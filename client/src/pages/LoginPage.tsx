@@ -1,14 +1,14 @@
+import { useMutation } from '@tanstack/react-query'
 import { type FormEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import { loginRequestSchema } from '../schemas/login'
+import { authUserFromSession, loginRequestSchema, safeParseAuthSessionResponse } from '../schemas/login'
 import { Logo } from '../components/Logo'
+import api from '../lib/api'
+import { getErrorMessage } from '../lib/error-utils'
 
 export function LoginPage() {
-  const login = useAuthStore((s) => s.login)
-  const clearError = useAuthStore((s) => s.clearError)
-  const error = useAuthStore((s) => s.error)
-  const isLoading = useAuthStore((s) => s.isLoading)
+  const setUser = useAuthStore((s) => s.setUser)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,9 +17,25 @@ export function LoginPage() {
     password?: string
   }>({})
 
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post<unknown>('/auth/login', { email, password })
+      const parsed = safeParseAuthSessionResponse(data)
+      if (!parsed.success) {
+        throw parsed.error
+      }
+      return authUserFromSession(parsed.data)
+    },
+    onSuccess: (user) => {
+      setUser(user)
+    },
+  })
+
+  const { isPending, error } = mutation
+  const errorMessage = error ? getErrorMessage(error, 'Anmeldung fehlgeschlagen.') : null
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    clearError()
     setFieldErrors({})
 
     const parsed = loginRequestSchema.safeParse({ email, password })
@@ -32,17 +48,15 @@ export function LoginPage() {
       return
     }
 
-    try {
-      await login(parsed.data.email, parsed.data.password)
-    } catch {
-      /* error surfaced via store */
-    }
+    mutation.mutate()
   }
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 box-border">
       <div className="w-full max-w-[400px] p-8 px-7 rounded-xl border border-border bg-bg shadow-custom text-left">
-        <Logo height={48} className="mb-8" />
+        <div className="flex justify-center mb-8">
+          <Logo height={60} />
+        </div>
         <h1 className="text-[28px] -tracking-[0.5px] m-0 mb-2 font-heading">Anmelden</h1>
         <p className="m-0 mb-6 text-[15px] text-text">Verwenden Sie Ihre Zugangsdaten.</p>
 
@@ -58,7 +72,7 @@ export function LoginPage() {
             className="font-inherit p-2.5 px-3 rounded-lg border border-border bg-bg text-text-h transition-[border-color,box-shadow] duration-200 focus:outline-none focus:border-accent-border focus:shadow-[0_0_0_3px_var(--accent-bg)] disabled:opacity-65 disabled:cursor-not-allowed"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
+            disabled={isPending}
             aria-invalid={fieldErrors.email ? true : undefined}
             aria-describedby={fieldErrors.email ? 'email-error' : undefined}
           />
@@ -79,7 +93,7 @@ export function LoginPage() {
             className="font-inherit p-2.5 px-3 rounded-lg border border-border bg-bg text-text-h transition-[border-color,box-shadow] duration-200 focus:outline-none focus:border-accent-border focus:shadow-[0_0_0_3px_var(--accent-bg)] disabled:opacity-65 disabled:cursor-not-allowed"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
+            disabled={isPending}
             aria-invalid={fieldErrors.password ? true : undefined}
             aria-describedby={
               fieldErrors.password ? 'password-error' : undefined
@@ -91,14 +105,14 @@ export function LoginPage() {
             </p>
           ) : null}
 
-          {error ? (
+          {errorMessage ? (
             <p className="mt-3 p-2.5 px-3 rounded-lg text-sm text-error-text bg-error-bg border border-error-border" role="alert">
-              {error}
+              {errorMessage}
             </p>
           ) : null}
 
-          <button type="submit" className="mt-5 font-inherit font-medium p-3 px-4 rounded-lg border-2 cursor-pointer text-text-h bg-accent-bg border-accent-border transition-[box-shadow,transform] duration-200 hover:enabled:shadow-custom active:enabled:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed" disabled={isLoading}>
-            {isLoading ? 'Anmeldung…' : 'Anmelden'}
+          <button type="submit" className="mt-5 font-inherit font-medium p-3 px-4 rounded-lg border-2 cursor-pointer text-text-h bg-accent-bg border-accent-border transition-[box-shadow,transform] duration-200 hover:enabled:shadow-custom active:enabled:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed" disabled={isPending}>
+            {isPending ? 'Anmeldung…' : 'Anmelden'}
           </button>
         </form>
 

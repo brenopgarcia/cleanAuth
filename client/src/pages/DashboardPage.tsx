@@ -1,5 +1,6 @@
+import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../lib/api'
 import { safeParseMeResponse } from '../schemas/me'
@@ -14,54 +15,32 @@ export function DashboardPage() {
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
 
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [me, setMe] = useState<{ userId: string; email: string } | null>(null)
+  const { data: me, isLoading, error: queryError } = useQuery({
+    queryKey: ['me'],
+    queryFn: async () => {
+      const { data } = await api.get<unknown>('/me')
+      const parsed = safeParseMeResponse(data)
+      if (!parsed.success) {
+        throw new Error('Unerwartete Antwort vom Server.')
+      }
+      return parsed.data
+    },
+  })
 
   useEffect(() => {
-    let cancelled = false
-
-    async function run() {
-      setLoading(true)
-      setError(null)
-      try {
-        const { data } = await api.get<unknown>('/me')
-        if (cancelled) return
-        const parsed = safeParseMeResponse(data)
-        if (!parsed.success) {
-          setError('Unerwartete Antwort vom Server.')
-          setMe(null)
-          return
-        }
-        setMe(parsed.data)
-      } catch (err: unknown) {
-        if (cancelled) return
-        if (axios.isAxiosError(err) && err.response?.status === 401) {
-          logout()
-          navigate('/login', { replace: true })
-          return
-        }
-        const message =
-          axios.isAxiosError(err) && err.response?.data
-            ? String(
-                (err.response.data as { message?: string }).message ??
-                  err.message,
-              )
-            : err instanceof Error
-              ? err.message
-              : 'Die API konnte nicht erreicht werden.'
-        setError(message)
-        setMe(null)
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
+    if (axios.isAxiosError(queryError) && queryError.response?.status === 401) {
+      logout()
+      navigate('/login', { replace: true })
     }
+  }, [queryError, logout, navigate])
 
-    void run()
-    return () => {
-      cancelled = true
-    }
-  }, [logout, navigate])
+  const errorMessage = queryError
+    ? axios.isAxiosError(queryError) && queryError.response?.data
+      ? String((queryError.response.data as { message?: string }).message ?? queryError.message)
+      : queryError instanceof Error
+        ? queryError.message
+        : 'Die API konnte nicht erreicht werden.'
+    : null
 
   const idsMatch =
     me && user
@@ -84,15 +63,15 @@ export function DashboardPage() {
 
       <div className="p-5 px-[22px] rounded-xl border border-border bg-bg shadow-custom mb-5 text-left">
         <h2 className="text-[17px] m-0 mb-3.5 text-text-h">API-Verifizierung</h2>
-        {loading ? (
+        {isLoading ? (
           <p className="text-sm text-text m-3 mt-0">Profil wird vom Server geladen…</p>
         ) : null}
-        {error && !loading ? (
+        {errorMessage && !isLoading ? (
           <p className="inline-flex items-center gap-2 p-2 px-3 rounded-lg text-sm font-medium mt-1 text-error-text bg-error-bg border border-error-border" role="alert">
-            {error}
+            {errorMessage}
           </p>
         ) : null}
-        {me && !loading ? (
+        {me && !isLoading ? (
           <>
             <dl className="m-0 grid grid-cols-[auto,1fr] gap-x-5 gap-y-2 text-sm">
               <dt className="m-0 text-text font-medium text-left">Benutzer-ID</dt>
