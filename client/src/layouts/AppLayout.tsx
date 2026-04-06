@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useCallback, useState } from 'react'
 import { useAuthStore } from '../store/authStore'
+import { Logo } from '../components/Logo'
 
 const SIDEBAR_COLLAPSED_KEY = 'app-sidebar-collapsed'
 
@@ -123,28 +124,23 @@ export function AppLayout() {
 
   return (
     <div className="flex min-h-svh w-full text-left box-border max-md:flex-col">
-      <aside 
+      <aside
         className={`
           flex flex-col gap-5 p-6 border-r border-border bg-bg transition-[flex-basis,width,padding] duration-220 ease
           max-md:flex-none max-md:w-full! max-md:flex-row max-md:flex-wrap max-md:items-center max-md:gap-3 max-md:border-r-0 max-md:border-b max-md:p-4
-          ${collapsed ? 'basis-[72px] w-[18] p-5 px-3 items-stretch max-md:w-full!' : 'basis-[220px] w-[220px]'}
-        `} 
-        aria-label="Main navigation"
+          ${collapsed ? 'basis-[72px] w-[18] p-5 px-3 items-stretch max-md:w-full!' : 'basis-[260px] w-[260px]'}
+        `}
+        aria-label="Hauptnavigation"
       >
-        <div className={`flex items-center justify-between gap-2 min-h-[28px] max-md:basis-full max-md:min-w-0 ${collapsed ? 'flex-col max-md:flex-row items-center gap-3' : ''}`}>
-          <div className="relative min-w-0 flex-1 font-heading text-lg font-semibold text-text-h -tracking-[0.02em]" aria-label="CleanAuth">
-            <span className={`block whitespace-nowrap overflow-hidden text-ellipsis transition-opacity duration-150 ${collapsed ? 'hidden max-md:block' : 'block'}`}>CleanAuth</span>
-            <span className={`hidden text-center text-xl transition-opacity duration-150 ${collapsed ? 'block max-md:hidden' : 'hidden'}`} aria-hidden>
-              C
-            </span>
-          </div>
+        <div className={`flex items-center justify-between gap-1 min-h-[32px] max-md:basis-full max-md:min-w-0 ${collapsed ? 'flex-col items-center gap-4' : ''}`}>
+          <Logo collapsed={collapsed} height={36} className={collapsed ? 'w-full' : ''} />
           <button
             type="button"
-            className="shrink-0 flex items-center justify-center w-9 h-9 p-0 border border-border rounded-lg bg-bg text-text-h cursor-pointer transition-[border-color,background,box-shadow] duration-200 hover:border-accent-border hover:bg-accent-bg focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 max-md:hidden"
+            className={`shrink-0 flex items-center justify-center w-9 h-9 p-0 border border-border rounded-lg bg-bg text-text-h cursor-pointer transition-[border-color,background,box-shadow] duration-200 hover:border-accent-border hover:bg-accent-bg focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 max-md:hidden`}
             onClick={toggleSidebar}
             aria-expanded={!collapsed}
             aria-controls="app-sidebar-nav"
-            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={collapsed ? 'Ausklappen' : 'Einklappen'}
           >
             {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </button>
@@ -173,10 +169,10 @@ export function AppLayout() {
                ${isActive ? 'text-text-h bg-accent-bg border border-accent-border p-[9px] px-[11px]' : ''}
                ${collapsed ? 'justify-center max-md:justify-start' : ''}`
             }
-            title="Profile"
+            title="Profil"
           >
             <ProfileIcon />
-            <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Profile</span>
+            <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Profil</span>
           </NavLink>
         </nav>
         <button
@@ -188,10 +184,10 @@ export function AppLayout() {
             ${collapsed ? 'justify-center p-2.5 px-2.5' : ''}
           `}
           onClick={() => logout()}
-          title="Sign out"
+          title="Abmelden"
         >
           <LogoutIcon />
-          <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Sign out</span>
+          <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Abmelden</span>
         </button>
       </aside>
       <div className="flex-1 min-w-0 p-7 px-8 pb-10 box-border max-md:p-5 max-md:px-4 max-md:pb-8">

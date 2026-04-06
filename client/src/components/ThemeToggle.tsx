@@ -41,13 +41,13 @@ export function ThemeToggle() {
   const btnClass = "flex items-center justify-center w-11 h-10.5 p-0 border-none bg-transparent text-text cursor-pointer transition-[background,color,transform] duration-150 hover:text-text-h hover:bg-accent-bg active:scale-96 aria-pressed:text-accent aria-pressed:bg-accent-bg focus-visible:outline-2 focus-visible:outline-accent focus-visible:-outline-offset-2 focus-visible:z-10"
 
   return (
-    <div className="fixed top-4 right-4 z-50 inline-flex items-stretch rounded-xl border border-border bg-bg shadow-custom overflow-hidden" role="group" aria-label="Color theme">
+    <div className="fixed top-4 right-4 z-50 inline-flex items-stretch rounded-xl border border-border bg-bg shadow-custom overflow-hidden" role="group" aria-label="Farbschema">
       <button
         type="button"
         className={`${btnClass} border-r border-border`}
         aria-pressed={theme === 'light'}
-        aria-label="Light mode"
-        title="Light mode"
+        aria-label="Heller Modus"
+        title="Heller Modus"
         onClick={() => setTheme('light')}
       >
         <SunIcon />
@@ -56,8 +56,8 @@ export function ThemeToggle() {
         type="button"
         className={btnClass}
         aria-pressed={theme === 'dark'}
-        aria-label="Dark mode"
-        title="Dark mode"
+        aria-label="Dunkler Modus"
+        title="Dunkler Modus"
         onClick={() => setTheme('dark')}
       >
         <MoonIcon />

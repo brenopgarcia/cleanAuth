@@ -29,7 +29,7 @@ export function DashboardPage() {
         if (cancelled) return
         const parsed = safeParseMeResponse(data)
         if (!parsed.success) {
-          setError('Unexpected response from the server.')
+          setError('Unerwartete Antwort vom Server.')
           setMe(null)
           return
         }
@@ -49,7 +49,7 @@ export function DashboardPage() {
               )
             : err instanceof Error
               ? err.message
-              : 'Could not reach the API.'
+              : 'Die API konnte nicht erreicht werden.'
         setError(message)
         setMe(null)
       } finally {
@@ -75,16 +75,17 @@ export function DashboardPage() {
     <div className="max-w-[640px]">
       <h1 className="text-[28px] -tracking-[0.03em] m-0 mb-3 text-left">Dashboard</h1>
       <p className="m-0 mb-6 text-base leading-relaxed text-text text-left">
-        This screen calls the protected endpoint{' '}
-        <code className="font-mono inline-flex rounded-sm text-text-h text-[15px] leading-[1.35] p-1 px-2 bg-code-bg">GET /api/me</code> using the HttpOnly
-        session cookie set at login. If the response matches your client
-        session, auth is wired correctly end-to-end.
+        Dieses Dashboard ruft den geschützten Endpunkt{' '}
+        <code className="font-mono inline-flex rounded-sm text-text-h text-[15px] leading-[1.35] p-1 px-2 bg-code-bg">GET /api/me</code> über das beim
+        Login gesetzte HttpOnly-Sitzungscookie auf. Wenn die Antwort mit Ihrer
+        Client-Sitzung übereinstimmt, ist die Authentifizierung end-to-end
+        korrekt konfiguriert.
       </p>
 
       <div className="p-5 px-[22px] rounded-xl border border-border bg-bg shadow-custom mb-5 text-left">
-        <h2 className="text-[17px] m-0 mb-3.5 text-text-h">API verification</h2>
+        <h2 className="text-[17px] m-0 mb-3.5 text-text-h">API-Verifizierung</h2>
         {loading ? (
-          <p className="text-sm text-text m-3 mt-0">Loading profile from the server…</p>
+          <p className="text-sm text-text m-3 mt-0">Profil wird vom Server geladen…</p>
         ) : null}
         {error && !loading ? (
           <p className="inline-flex items-center gap-2 p-2 px-3 rounded-lg text-sm font-medium mt-1 text-error-text bg-error-bg border border-error-border" role="alert">
@@ -94,9 +95,9 @@ export function DashboardPage() {
         {me && !loading ? (
           <>
             <dl className="m-0 grid grid-cols-[auto,1fr] gap-x-5 gap-y-2 text-sm">
-              <dt className="m-0 text-text font-medium text-left">userId</dt>
+              <dt className="m-0 text-text font-medium text-left">Benutzer-ID</dt>
               <dd className="m-0 text-text-h font-mono text-[13px] break-all">{me.userId}</dd>
-              <dt className="m-0 text-text font-medium text-left">email</dt>
+              <dt className="m-0 text-text font-medium text-left">E-Mail</dt>
               <dd className="m-0 text-text-h font-mono text-[13px] break-all">{me.email}</dd>
             </dl>
             <p
@@ -108,8 +109,8 @@ export function DashboardPage() {
               role="status"
             >
               {sessionAligned
-                ? 'Session cookie is valid and matches this browser session.'
-                : 'API responded, but user id or email differs from the stored session (check API claims vs client state).'}
+                ? 'Das Sitzungscookie ist gültig und stimmt mit dieser Browsersitzung überein.'
+                : 'Die API hat geantwortet, aber die Benutzer-ID oder E-Mail weicht von der gespeicherten Sitzung ab (überprüfen Sie die API-Claims gegen den Client-Status).'}
             </p>
           </>
         ) : null}

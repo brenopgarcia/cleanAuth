@@ -2,6 +2,7 @@ import { type FormEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { loginRequestSchema } from '../schemas/login'
+import { Logo } from '../components/Logo'
 
 export function LoginPage() {
   const login = useAuthStore((s) => s.login)
@@ -41,12 +42,13 @@ export function LoginPage() {
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 box-border">
       <div className="w-full max-w-[400px] p-8 px-7 rounded-xl border border-border bg-bg shadow-custom text-left">
-        <h1 className="text-[28px] -tracking-[0.5px] m-0 mb-2">Sign in</h1>
-        <p className="m-0 mb-6 text-[15px] text-text">Use your account credentials.</p>
+        <Logo height={48} className="mb-8" />
+        <h1 className="text-[28px] -tracking-[0.5px] m-0 mb-2 font-heading">Anmelden</h1>
+        <p className="m-0 mb-6 text-[15px] text-text">Verwenden Sie Ihre Zugangsdaten.</p>
 
         <form className="flex flex-col gap-1.5" onSubmit={handleSubmit}>
           <label className="text-sm font-medium text-text-h mt-2.5 first:mt-0" htmlFor="email">
-            Email
+            E-Mail
           </label>
           <input
             id="email"
@@ -67,7 +69,7 @@ export function LoginPage() {
           ) : null}
 
           <label className="text-sm font-medium text-text-h mt-2.5" htmlFor="password">
-            Password
+            Passwort
           </label>
           <input
             id="password"
@@ -96,12 +98,12 @@ export function LoginPage() {
           ) : null}
 
           <button type="submit" className="mt-5 font-inherit font-medium p-3 px-4 rounded-lg border-2 cursor-pointer text-text-h bg-accent-bg border-accent-border transition-[box-shadow,transform] duration-200 hover:enabled:shadow-custom active:enabled:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed" disabled={isLoading}>
-            {isLoading ? 'Signing in…' : 'Sign in'}
+            {isLoading ? 'Anmeldung…' : 'Anmelden'}
           </button>
         </form>
 
         <p className="mt-[22px] text-[15px] text-text text-center">
-          No account? <Link to="/register" className="text-accent font-medium no-underline hover:underline">Create one</Link>
+          Noch kein Konto? <Link to="/register" className="text-accent font-medium no-underline hover:underline">Konto erstellen</Link>
         </p>
       </div>
     </div>

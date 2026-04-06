@@ -36,7 +36,7 @@ function zodIssueMessage(err: ZodError): string {
   const flat = err.flatten()
   const field = Object.values(flat.fieldErrors).flat()[0]
   if (field) return field
-  return flat.formErrors[0] ?? 'Validation failed.'
+  return flat.formErrors[0] ?? 'Validierung fehlgeschlagen.'
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -99,7 +99,7 @@ export const useAuthStore = create<AuthState>()(
                 )
               : err instanceof Error
                 ? err.message
-                : 'Login failed.'
+                : 'Anmeldung fehlgeschlagen.'
           set({ error: message, isLoading: false })
           throw err
         }
@@ -160,7 +160,7 @@ export const useAuthStore = create<AuthState>()(
                 )
               : err instanceof Error
                 ? err.message
-                : 'Registration failed.'
+                : 'Registrierung fehlgeschlagen.'
           set({ error: message, isLoading: false })
           throw err
         }

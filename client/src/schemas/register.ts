@@ -7,14 +7,14 @@ import {
 
 /** Body sent to `POST /auth/register` */
 export const registerRequestSchema = z.object({
-  email: z.string().trim().min(1, 'Email is required').email('Invalid email'),
+  email: z.string().trim().min(1, 'E-Mail ist erforderlich').email('Ungültige E-Mail'),
   password: z
     .string()
-    .min(6, 'Password must be at least 6 characters'),
+    .min(6, 'Das Passwort muss mindestens 6 Zeichen lang sein'),
   userName: z
     .preprocess(
       (v) => (v === '' || v === undefined || v === null ? undefined : v),
-      z.string().trim().max(128, 'Username is too long').optional(),
+      z.string().trim().max(128, 'Benutzername ist zu lang').optional(),
     ),
 })
 
@@ -23,10 +23,10 @@ export type RegisterRequest = z.infer<typeof registerRequestSchema>
 /** Full signup form including password confirmation */
 export const registerFormSchema = registerRequestSchema
   .extend({
-    confirmPassword: z.string().min(1, 'Confirm your password'),
+    confirmPassword: z.string().min(1, 'Bestätigen Sie Ihr Passwort'),
   })
   .refine((d) => d.password === d.confirmPassword, {
-    message: 'Passwords do not match',
+    message: 'Passwörter stimmen nicht überein',
     path: ['confirmPassword'],
   })
 
