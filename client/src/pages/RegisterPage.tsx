@@ -6,6 +6,10 @@ import { registerFormSchema } from '../schemas/register'
 import { authUserFromSession } from '../schemas/login'
 import { useAuthStore } from '../store/authStore'
 import { Logo } from '../components/Logo'
+import { PasswordInput } from '../components/PasswordInput'
+import { EmailInput } from '../components/EmailInput'
+import { Card } from '../components/Card'
+import { Label } from '../components/Label'
 import api from '../lib/api'
 import { getErrorMessage } from '../lib/error-utils'
 
@@ -26,7 +30,9 @@ export function RegisterPage() {
   const mutation = useMutation({
     mutationFn: async () => {
       const payload: Record<string, string> = { email, password }
-      if (userName.trim()) payload.userName = userName.trim()
+      if (userName.trim()) {
+        payload.userName = userName.trim()
+      }
 
       const { data } = await api.post<unknown>('/auth/register', payload)
       const parsed = safeParseRegisterResponse(data)
@@ -73,12 +79,11 @@ export function RegisterPage() {
   }
 
   const inputClass = "font-inherit p-2.5 px-3 rounded-lg border border-border bg-bg text-text-h transition-[border-color,box-shadow] duration-200 focus:outline-none focus:border-accent-border focus:shadow-[0_0_0_3px_var(--accent-bg)] disabled:opacity-65 disabled:cursor-not-allowed"
-  const labelClass = "text-sm font-medium text-text-h mt-2.5 first:mt-0"
   const errorTextClass = "m-1 mb-0 mt-1 text-[13px] text-error-text"
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 box-border">
-      <div className="w-full max-w-[400px] p-8 px-7 rounded-xl border border-border bg-bg shadow-custom text-left">
+      <Card className="w-full max-w-[400px] text-left">
         <div className="flex justify-center mb-8">
           <Logo height={60} />
         </div>
@@ -86,13 +91,12 @@ export function RegisterPage() {
         <p className="m-0 mb-6 text-[15px] text-text">Registrieren Sie sich mit Ihrer E-Mail und einem Passwort.</p>
 
         <form className="flex flex-col gap-1.5" onSubmit={handleSubmit}>
-          <label className={labelClass} htmlFor="register-email">
+          <Label htmlFor="register-email">
             E-Mail
-          </label>
-          <input
+          </Label>
+          <EmailInput
             id="register-email"
             name="email"
-            type="email"
             autoComplete="email"
             className={inputClass}
             value={email}
@@ -113,9 +117,9 @@ export function RegisterPage() {
             </p>
           ) : null}
 
-          <label className={labelClass} htmlFor="register-username">
+          <Label htmlFor="register-username">
             Benutzername <span className="font-normal text-text opacity-85">(optional)</span>
-          </label>
+          </Label>
           <input
             id="register-username"
             name="userName"
@@ -140,13 +144,12 @@ export function RegisterPage() {
             </p>
           ) : null}
 
-          <label className={labelClass} htmlFor="register-password">
+          <Label htmlFor="register-password">
             Passwort
-          </label>
-          <input
+          </Label>
+          <PasswordInput
             id="register-password"
             name="password"
-            type="password"
             autoComplete="new-password"
             className={inputClass}
             value={password}
@@ -167,13 +170,12 @@ export function RegisterPage() {
             </p>
           ) : null}
 
-          <label className={labelClass} htmlFor="register-confirm">
+          <Label htmlFor="register-confirm">
             Passwort bestätigen
-          </label>
-          <input
+          </Label>
+          <PasswordInput
             id="register-confirm"
             name="confirmPassword"
-            type="password"
             autoComplete="new-password"
             className={inputClass}
             value={confirmPassword}
@@ -209,7 +211,7 @@ export function RegisterPage() {
           Haben Sie bereits ein Konto?{' '}
           <Link to="/login" className="text-accent font-medium no-underline hover:underline">Anmelden</Link>
         </p>
-      </div>
+      </Card>
     </div>
   )
 }

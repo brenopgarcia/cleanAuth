@@ -4,6 +4,10 @@ import { Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { authUserFromSession, loginRequestSchema, safeParseAuthSessionResponse } from '../schemas/login'
 import { Logo } from '../components/Logo'
+import { PasswordInput } from '../components/PasswordInput'
+import { EmailInput } from '../components/EmailInput'
+import { Card } from '../components/Card'
+import { Label } from '../components/Label'
 import api from '../lib/api'
 import { getErrorMessage } from '../lib/error-utils'
 
@@ -53,7 +57,7 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 box-border">
-      <div className="w-full max-w-[400px] p-8 px-7 rounded-xl border border-border bg-bg shadow-custom text-left">
+      <Card className="w-full max-w-[400px] text-left">
         <div className="flex justify-center mb-8">
           <Logo height={60} />
         </div>
@@ -61,13 +65,12 @@ export function LoginPage() {
         <p className="m-0 mb-6 text-[15px] text-text">Verwenden Sie Ihre Zugangsdaten.</p>
 
         <form className="flex flex-col gap-1.5" onSubmit={handleSubmit}>
-          <label className="text-sm font-medium text-text-h mt-2.5 first:mt-0" htmlFor="email">
+          <Label htmlFor="email">
             E-Mail
-          </label>
-          <input
+          </Label>
+          <EmailInput
             id="email"
             name="email"
-            type="email"
             autoComplete="email"
             className="font-inherit p-2.5 px-3 rounded-lg border border-border bg-bg text-text-h transition-[border-color,box-shadow] duration-200 focus:outline-none focus:border-accent-border focus:shadow-[0_0_0_3px_var(--accent-bg)] disabled:opacity-65 disabled:cursor-not-allowed"
             value={email}
@@ -82,13 +85,12 @@ export function LoginPage() {
             </p>
           ) : null}
 
-          <label className="text-sm font-medium text-text-h mt-2.5" htmlFor="password">
+          <Label htmlFor="password">
             Passwort
-          </label>
-          <input
+          </Label>
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             autoComplete="current-password"
             className="font-inherit p-2.5 px-3 rounded-lg border border-border bg-bg text-text-h transition-[border-color,box-shadow] duration-200 focus:outline-none focus:border-accent-border focus:shadow-[0_0_0_3px_var(--accent-bg)] disabled:opacity-65 disabled:cursor-not-allowed"
             value={password}
@@ -119,7 +121,7 @@ export function LoginPage() {
         <p className="mt-[22px] text-[15px] text-text text-center">
           Noch kein Konto? <Link to="/register" className="text-accent font-medium no-underline hover:underline">Konto erstellen</Link>
         </p>
-      </div>
+      </Card>
     </div>
   )
 }

@@ -2,10 +2,15 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useCallback, useState } from 'react'
 import { useAuthStore } from '../store/authStore'
 import { Logo } from '../components/Logo'
+import { DashboardIcon } from '../components/DashboardIcon'
+import { ProfileIcon } from '../components/ProfileIcon'
+import { LogoutIcon } from '../components/LogoutIcon'
+import { ChevronLeftIcon } from '../components/ChevronLeftIcon'
+import { ChevronRightIcon } from '../components/ChevronRightIcon'
 
 const SIDEBAR_COLLAPSED_KEY = 'app-sidebar-collapsed'
 
-function readCollapsed(): boolean {
+const readCollapsed = (): boolean => {
   try {
     return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1'
   } catch {
@@ -13,7 +18,7 @@ function readCollapsed(): boolean {
   }
 }
 
-function writeCollapsed(value: boolean) {
+const writeCollapsed = (value: boolean) => {
   try {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, value ? '1' : '0')
   } catch {
@@ -21,94 +26,6 @@ function writeCollapsed(value: boolean) {
   }
 }
 
-function DashboardIcon() {
-  return (
-    <svg
-      className="w-5 h-5 shrink-0"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <path d="M9 22V12h6v10" />
-    </svg>
-  )
-}
-
-function ProfileIcon() {
-  return (
-    <svg
-      className="w-5 h-5 shrink-0"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  )
-}
-
-function LogoutIcon() {
-  return (
-    <svg
-      className="w-5 h-5 shrink-0"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  )
-}
-
-function ChevronLeftIcon() {
-  return (
-    <svg
-      className="w-4.5 h-4.5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <polyline points="15 18 9 12 15 6" />
-    </svg>
-  )
-}
-
-function ChevronRightIcon() {
-  return (
-    <svg
-      className="w-4.5 h-4.5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <polyline points="9 18 15 12 9 6" />
-    </svg>
-  )
-}
 
 export function AppLayout() {
   const logout = useAuthStore((s) => s.logout)
