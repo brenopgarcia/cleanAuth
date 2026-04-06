@@ -1,10 +1,9 @@
 import { useThemeStore } from '../store/themeStore'
-import './ThemeToggle.css'
 
 function SunIcon() {
   return (
     <svg
-      className="theme-toggle__icon"
+      className="w-5 h-5 pointer-events-none"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -21,7 +20,7 @@ function SunIcon() {
 function MoonIcon() {
   return (
     <svg
-      className="theme-toggle__icon"
+      className="w-5 h-5 pointer-events-none"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -39,11 +38,13 @@ export function ThemeToggle() {
   const theme = useThemeStore((s) => s.theme)
   const setTheme = useThemeStore((s) => s.setTheme)
 
+  const btnClass = "flex items-center justify-center w-11 h-10.5 p-0 border-none bg-transparent text-text cursor-pointer transition-[background,color,transform] duration-150 hover:text-text-h hover:bg-accent-bg active:scale-96 aria-pressed:text-accent aria-pressed:bg-accent-bg focus-visible:outline-2 focus-visible:outline-accent focus-visible:-outline-offset-2 focus-visible:z-10"
+
   return (
-    <div className="theme-toggle" role="group" aria-label="Color theme">
+    <div className="fixed top-4 right-4 z-50 inline-flex items-stretch rounded-xl border border-border bg-bg shadow-custom overflow-hidden" role="group" aria-label="Color theme">
       <button
         type="button"
-        className="theme-toggle__btn"
+        className={`${btnClass} border-r border-border`}
         aria-pressed={theme === 'light'}
         aria-label="Light mode"
         title="Light mode"
@@ -53,7 +54,7 @@ export function ThemeToggle() {
       </button>
       <button
         type="button"
-        className="theme-toggle__btn"
+        className={btnClass}
         aria-pressed={theme === 'dark'}
         aria-label="Dark mode"
         title="Dark mode"
@@ -64,3 +65,4 @@ export function ThemeToggle() {
     </div>
   )
 }
+

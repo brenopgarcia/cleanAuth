@@ -2,7 +2,6 @@ import { type FormEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { loginRequestSchema } from '../schemas/login'
-import './LoginPage.css'
 
 export function LoginPage() {
   const login = useAuthStore((s) => s.login)
@@ -40,13 +39,13 @@ export function LoginPage() {
   }
 
   return (
-    <div className="login-page">
-      <div className="login-card">
-        <h1 className="login-title">Sign in</h1>
-        <p className="login-subtitle">Use your account credentials.</p>
+    <div className="flex min-h-svh w-full items-center justify-center p-6 box-border">
+      <div className="w-full max-w-[400px] p-8 px-7 rounded-xl border border-border bg-bg shadow-custom text-left">
+        <h1 className="text-[28px] -tracking-[0.5px] m-0 mb-2">Sign in</h1>
+        <p className="m-0 mb-6 text-[15px] text-text">Use your account credentials.</p>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <label className="login-label" htmlFor="email">
+        <form className="flex flex-col gap-1.5" onSubmit={handleSubmit}>
+          <label className="text-sm font-medium text-text-h mt-2.5 first:mt-0" htmlFor="email">
             Email
           </label>
           <input
@@ -54,7 +53,7 @@ export function LoginPage() {
             name="email"
             type="email"
             autoComplete="email"
-            className="login-input"
+            className="font-inherit p-2.5 px-3 rounded-lg border border-border bg-bg text-text-h transition-[border-color,box-shadow] duration-200 focus:outline-none focus:border-accent-border focus:shadow-[0_0_0_3px_var(--accent-bg)] disabled:opacity-65 disabled:cursor-not-allowed"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
@@ -62,12 +61,12 @@ export function LoginPage() {
             aria-describedby={fieldErrors.email ? 'email-error' : undefined}
           />
           {fieldErrors.email ? (
-            <p id="email-error" className="login-field-error" role="alert">
+            <p id="email-error" className="m-1 mb-0 mt-1 text-[13px] text-error-text" role="alert">
               {fieldErrors.email}
             </p>
           ) : null}
 
-          <label className="login-label" htmlFor="password">
+          <label className="text-sm font-medium text-text-h mt-2.5" htmlFor="password">
             Password
           </label>
           <input
@@ -75,7 +74,7 @@ export function LoginPage() {
             name="password"
             type="password"
             autoComplete="current-password"
-            className="login-input"
+            className="font-inherit p-2.5 px-3 rounded-lg border border-border bg-bg text-text-h transition-[border-color,box-shadow] duration-200 focus:outline-none focus:border-accent-border focus:shadow-[0_0_0_3px_var(--accent-bg)] disabled:opacity-65 disabled:cursor-not-allowed"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
@@ -85,26 +84,27 @@ export function LoginPage() {
             }
           />
           {fieldErrors.password ? (
-            <p id="password-error" className="login-field-error" role="alert">
+            <p id="password-error" className="m-1 mb-0 mt-1 text-[13px] text-error-text" role="alert">
               {fieldErrors.password}
             </p>
           ) : null}
 
           {error ? (
-            <p className="login-error" role="alert">
+            <p className="mt-3 p-2.5 px-3 rounded-lg text-sm text-error-text bg-error-bg border border-error-border" role="alert">
               {error}
             </p>
           ) : null}
 
-          <button type="submit" className="login-submit" disabled={isLoading}>
+          <button type="submit" className="mt-5 font-inherit font-medium p-3 px-4 rounded-lg border-2 cursor-pointer text-text-h bg-accent-bg border-accent-border transition-[box-shadow,transform] duration-200 hover:enabled:shadow-custom active:enabled:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed" disabled={isLoading}>
             {isLoading ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
 
-        <p className="login-footer">
-          No account? <Link to="/register">Create one</Link>
+        <p className="mt-[22px] text-[15px] text-text text-center">
+          No account? <Link to="/register" className="text-accent font-medium no-underline hover:underline">Create one</Link>
         </p>
       </div>
     </div>
   )
 }
+

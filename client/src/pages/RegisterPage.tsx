@@ -2,7 +2,6 @@ import { type FormEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { registerFormSchema } from '../schemas/register'
 import { useAuthStore } from '../store/authStore'
-import './LoginPage.css'
 
 export function RegisterPage() {
   const register = useAuthStore((s) => s.register)
@@ -54,14 +53,18 @@ export function RegisterPage() {
     }
   }
 
-  return (
-    <div className="login-page">
-      <div className="login-card">
-        <h1 className="login-title">Create account</h1>
-        <p className="login-subtitle">Sign up with your email and a password.</p>
+  const inputClass = "font-inherit p-2.5 px-3 rounded-lg border border-border bg-bg text-text-h transition-[border-color,box-shadow] duration-200 focus:outline-none focus:border-accent-border focus:shadow-[0_0_0_3px_var(--accent-bg)] disabled:opacity-65 disabled:cursor-not-allowed"
+  const labelClass = "text-sm font-medium text-text-h mt-2.5 first:mt-0"
+  const errorTextClass = "m-1 mb-0 mt-1 text-[13px] text-error-text"
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <label className="login-label" htmlFor="register-email">
+  return (
+    <div className="flex min-h-svh w-full items-center justify-center p-6 box-border">
+      <div className="w-full max-w-[400px] p-8 px-7 rounded-xl border border-border bg-bg shadow-custom text-left">
+        <h1 className="text-[28px] -tracking-[0.5px] m-0 mb-2">Create account</h1>
+        <p className="m-0 mb-6 text-[15px] text-text">Sign up with your email and a password.</p>
+
+        <form className="flex flex-col gap-1.5" onSubmit={handleSubmit}>
+          <label className={labelClass} htmlFor="register-email">
             Email
           </label>
           <input
@@ -69,7 +72,7 @@ export function RegisterPage() {
             name="email"
             type="email"
             autoComplete="email"
-            className="login-input"
+            className={inputClass}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
@@ -81,22 +84,22 @@ export function RegisterPage() {
           {fieldErrors.email ? (
             <p
               id="register-email-error"
-              className="login-field-error"
+              className={errorTextClass}
               role="alert"
             >
               {fieldErrors.email}
             </p>
           ) : null}
 
-          <label className="login-label" htmlFor="register-username">
-            Username <span className="login-optional">(optional)</span>
+          <label className={labelClass} htmlFor="register-username">
+            Username <span className="font-normal text-text opacity-85">(optional)</span>
           </label>
           <input
             id="register-username"
             name="userName"
             type="text"
             autoComplete="username"
-            className="login-input"
+            className={inputClass}
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
             disabled={isLoading}
@@ -108,14 +111,14 @@ export function RegisterPage() {
           {fieldErrors.userName ? (
             <p
               id="register-username-error"
-              className="login-field-error"
+              className={errorTextClass}
               role="alert"
             >
               {fieldErrors.userName}
             </p>
           ) : null}
 
-          <label className="login-label" htmlFor="register-password">
+          <label className={labelClass} htmlFor="register-password">
             Password
           </label>
           <input
@@ -123,7 +126,7 @@ export function RegisterPage() {
             name="password"
             type="password"
             autoComplete="new-password"
-            className="login-input"
+            className={inputClass}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
@@ -135,14 +138,14 @@ export function RegisterPage() {
           {fieldErrors.password ? (
             <p
               id="register-password-error"
-              className="login-field-error"
+              className={errorTextClass}
               role="alert"
             >
               {fieldErrors.password}
             </p>
           ) : null}
 
-          <label className="login-label" htmlFor="register-confirm">
+          <label className={labelClass} htmlFor="register-confirm">
             Confirm password
           </label>
           <input
@@ -150,7 +153,7 @@ export function RegisterPage() {
             name="confirmPassword"
             type="password"
             autoComplete="new-password"
-            className="login-input"
+            className={inputClass}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             disabled={isLoading}
@@ -162,7 +165,7 @@ export function RegisterPage() {
           {fieldErrors.confirmPassword ? (
             <p
               id="register-confirm-error"
-              className="login-field-error"
+              className={errorTextClass}
               role="alert"
             >
               {fieldErrors.confirmPassword}
@@ -170,19 +173,19 @@ export function RegisterPage() {
           ) : null}
 
           {error ? (
-            <p className="login-error" role="alert">
+            <p className="mt-3 p-2.5 px-3 rounded-lg text-sm text-error-text bg-error-bg border border-error-border" role="alert">
               {error}
             </p>
           ) : null}
 
-          <button type="submit" className="login-submit" disabled={isLoading}>
+          <button type="submit" className="mt-5 font-inherit font-medium p-3 px-4 rounded-lg border-2 cursor-pointer text-text-h bg-accent-bg border-accent-border transition-[box-shadow,transform] duration-200 hover:enabled:shadow-custom active:enabled:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed" disabled={isLoading}>
             {isLoading ? 'Creating account…' : 'Create account'}
           </button>
         </form>
 
-        <p className="login-footer">
+        <p className="mt-[22px] text-[15px] text-text text-center">
           Already have an account?{' '}
-          <Link to="/login">Sign in</Link>
+          <Link to="/login" className="text-accent font-medium no-underline hover:underline">Sign in</Link>
         </p>
       </div>
     </div>
