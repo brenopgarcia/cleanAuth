@@ -1,0 +1,140 @@
+.login-page {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 32px 28px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  text-align: left;
+}
+
+.login-title {
+  font-size: 28px;
+  letter-spacing: -0.5px;
+  margin: 0 0 8px;
+}
+
+.login-subtitle {
+  margin: 0 0 24px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-h);
+  margin-top: 10px;
+}
+
+.login-label:first-of-type {
+  margin-top: 0;
+}
+
+.login-optional {
+  font-weight: 400;
+  color: var(--text);
+  opacity: 0.85;
+}
+
+.login-input {
+  font: inherit;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.login-input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.login-field-error {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--error-text);
+}
+
+.login-error {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--error-text);
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+}
+
+.login-submit {
+  margin-top: 20px;
+  font: inherit;
+  font-weight: 500;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  color: var(--text-h);
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  transition: box-shadow 0.2s, transform 0.05s;
+}
+
+.login-submit:hover:not(:disabled) {
+  box-shadow: var(--shadow);
+}
+
+.login-submit:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.login-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.login-footer {
+  margin-top: 22px;
+  font-size: 15px;
+  color: var(--text);
+  text-align: center;
+}
+
+.login-footer a {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
+
+.login-optional {
+  font-weight: 400;
+  color: var(--text);
+}
