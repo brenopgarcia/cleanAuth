@@ -42,7 +42,7 @@ export const Logo: React.FC<LogoProps> = ({ className, height = 32, collapsed = 
         </span>
         <span className="block h-[4px]" />
         <span
-          className="text-[0.68em] font-normal tracking-[0.41em] uppercase whitespace-nowrap"
+          className="text-[0.65em] font-normal tracking-[0.41em] uppercase whitespace-nowrap"
           style={{ color: 'var(--text)', fontFamily: 'var(--sans)' }}
         >
           CONSULTING
