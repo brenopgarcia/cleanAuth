@@ -338,15 +338,17 @@ export function BillingStockPage() {
           </tfoot>
         </table>
 
-        <div className="mt-4 flex flex-wrap items-stretch gap-3 text-sm">
-          <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom font-semibold">
-            Risiko in % &gt; 90Tg: <span className="text-red-600">38,0%</span>
+        <div className="mt-5 flex flex-wrap gap-3 text-sm">
+          <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom flex items-center">
+            Risiko in % &gt; 90Tg: <span className="text-red-600 font-semibold">38%</span>
           </div>
-          <div className="rounded-lg border border-black px-3 py-2 min-w-[130px]">
+          <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom">
             <div className="text-xs">davon</div>
-            <div className="text-xs">Bestands-bereinigung:</div>
-            <div className="text-right text-red-600 font-semibold">17</div>
+            <div className="text-xs">Bestands-bereinigung: <span className="text-red-600 font-semibold">17</span></div>
           </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-stretch gap-3 text-sm">
           <div className="ml-auto grid gap-2 min-w-[180px]">
             <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom">
               Monatslager: <strong>IST 2,5</strong> | <strong>Soll 2,0</strong>
