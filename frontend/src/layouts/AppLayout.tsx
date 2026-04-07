@@ -3,6 +3,9 @@ import { useCallback, useState } from 'react'
 import { useAuthStore } from '../store/authStore'
 import { Logo } from '../components/Logo'
 import { DashboardIcon } from '../components/DashboardIcon'
+import { ForecastIcon } from '../components/ForecastIcon'
+import { BillingStockIcon } from '../components/BillingStockIcon'
+import { InventoryIcon } from '../components/InventoryIcon'
 import { ProfileIcon } from '../components/ProfileIcon'
 import { LogoutIcon } from '../components/LogoutIcon'
 import { ChevronLeftIcon } from '../components/ChevronLeftIcon'
@@ -40,10 +43,10 @@ export function AppLayout() {
   }, [])
 
   return (
-    <div className="flex min-h-svh w-full text-left box-border max-md:flex-col">
+    <div className="flex h-svh w-full text-left box-border overflow-hidden max-md:flex-col">
       <aside
         className={`
-          flex flex-col gap-5 p-6 border-r border-border bg-bg transition-[flex-basis,width,padding] duration-220 ease
+          flex flex-col gap-5 p-6 border-r border-border bg-bg max-h-svh overflow-y-auto transition-[flex-basis,width,padding] duration-220 ease
           max-md:flex-none max-md:w-full! max-md:flex-row max-md:flex-wrap max-md:items-center max-md:gap-3 max-md:border-r-0 max-md:border-b max-md:p-4
           ${collapsed ? 'basis-[72px] w-[18] p-5 px-3 items-stretch max-md:w-full!' : 'basis-[260px] w-[260px]'}
         `}
@@ -79,6 +82,58 @@ export function AppLayout() {
             <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Dashboard</span>
           </NavLink>
           <NavLink
+            to="/bestand"
+            className={({ isActive }) =>
+              `flex items-center gap-2.5 p-2.5 px-3 rounded-lg text-[15px] font-medium text-text no-underline transition-[background,color] duration-150 relative
+               hover:text-text-h hover:bg-accent-bg
+               ${isActive ? 'text-text-h bg-accent-bg border border-accent-border p-[9px] px-[11px]' : ''}
+               ${collapsed ? 'justify-center max-md:justify-start' : ''}`
+            }
+            title="Bestand"
+          >
+            <InventoryIcon />
+            <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Bestand</span>
+          </NavLink>
+          <NavLink
+            to="/fakturierter-bestand"
+            className={({ isActive }) =>
+              `flex items-center gap-2.5 p-2.5 px-3 rounded-lg text-[15px] font-medium text-text no-underline transition-[background,color] duration-150 relative
+               hover:text-text-h hover:bg-accent-bg
+               ${isActive ? 'text-text-h bg-accent-bg border border-accent-border p-[9px] px-[11px]' : ''}
+               ${collapsed ? 'justify-center max-md:justify-start' : ''}`
+            }
+            title="Fakturierter Bestand"
+          >
+            <BillingStockIcon />
+            <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Fakt. Bestand</span>
+          </NavLink>
+          <NavLink
+            to="/forecast-nicht-fakturiert"
+            className={({ isActive }) =>
+              `flex items-center gap-2.5 p-2.5 px-3 rounded-lg text-[15px] font-medium text-text no-underline transition-[background,color] duration-150 relative
+               hover:text-text-h hover:bg-accent-bg
+               ${isActive ? 'text-text-h bg-accent-bg border border-accent-border p-[9px] px-[11px]' : ''}
+               ${collapsed ? 'justify-center max-md:justify-start' : ''}`
+            }
+            title="Forecast"
+          >
+            <ForecastIcon />
+            <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Forecast</span>
+          </NavLink>
+          <NavLink
+            to="/forecast-nicht-fakturiert-naechster-monat"
+            className={({ isActive }) =>
+              `flex items-center gap-2.5 p-2.5 px-3 rounded-lg text-[15px] font-medium text-text no-underline transition-[background,color] duration-150 relative
+               hover:text-text-h hover:bg-accent-bg
+               ${isActive ? 'text-text-h bg-accent-bg border border-accent-border p-[9px] px-[11px]' : ''}
+               ${collapsed ? 'justify-center max-md:justify-start' : ''}`
+            }
+            title="Forecast nächster Monat"
+          >
+            <ForecastIcon />
+            <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Forecast N+1</span>
+          </NavLink>
+          <NavLink
             to="/profile"
             className={({ isActive }) =>
               `flex items-center gap-2.5 p-2.5 px-3 rounded-lg text-[15px] font-medium text-text no-underline transition-[background,color] duration-150 relative
@@ -107,7 +162,7 @@ export function AppLayout() {
           <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Abmelden</span>
         </button>
       </aside>
-      <div className="flex-1 min-w-0 p-7 px-8 pb-10 box-border max-md:p-5 max-md:px-4 max-md:pb-8">
+      <div className="flex-1 min-w-0 p-7 px-8 pb-10 box-border overflow-y-auto max-md:p-5 max-md:px-4 max-md:pb-8">
         <Outlet />
       </div>
     </div>
