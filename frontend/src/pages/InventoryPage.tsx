@@ -350,8 +350,8 @@ export function InventoryPage() {
         <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom">
           Fahrzeuge im Vorlauf: <strong>13</strong>
         </div>
-        <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom">
-          Risiko in % &gt; 90 Tg: <strong>12,6%</strong>
+        <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom flex items-center">
+          Risiko in % &gt; 90 Tg: <span className="text-red-600 font-semibold">&nbsp;12,6%</span>
         </div>
       </div>
 

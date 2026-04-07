@@ -340,7 +340,7 @@ export function BillingStockPage() {
 
         <div className="mt-5 flex flex-wrap gap-3 text-sm">
           <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom flex items-center">
-            Risiko in % &gt; 90Tg: <span className="text-red-600 font-semibold">38%</span>
+            Risiko in % &gt; 90Tg: <span className="text-red-600 font-semibold">&nbsp;38%</span>
           </div>
           <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom">
             <div className="text-xs">davon</div>
