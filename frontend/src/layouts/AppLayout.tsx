@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useCallback, useState } from 'react'
 import { useAuthStore } from '../store/authStore'
 import { Logo } from '../components/Logo'
@@ -12,6 +12,14 @@ import { ChevronLeftIcon } from '../components/ChevronLeftIcon'
 import { ChevronRightIcon } from '../components/ChevronRightIcon'
 
 const SIDEBAR_COLLAPSED_KEY = 'app-sidebar-collapsed'
+const NAV_ITEMS = [
+  { to: '/', pageTitle: 'Dashboard', navLabel: 'Dashboard', icon: DashboardIcon },
+  { to: '/bestand', pageTitle: 'Bestand', navLabel: 'Bestand', icon: InventoryIcon },
+  { to: '/fakturierter-bestand', pageTitle: 'Fakturierter Bestand', navLabel: 'Fakt. Bestand', icon: BillingStockIcon },
+  { to: '/forecast-nicht-fakturiert', pageTitle: 'Forecast', navLabel: 'Forecast', icon: ForecastIcon },
+  { to: '/forecast-nicht-fakturiert-naechster-monat', pageTitle: 'Forecast N + 1', navLabel: 'Forecast N + 1', icon: ForecastIcon },
+  { to: '/profile', pageTitle: 'Profil', navLabel: 'Profil', icon: ProfileIcon },
+] as const
 
 const readCollapsed = (): boolean => {
   try {
@@ -33,6 +41,15 @@ const writeCollapsed = (value: boolean) => {
 export function AppLayout() {
   const logout = useAuthStore((s) => s.logout)
   const [collapsed, setCollapsed] = useState(readCollapsed)
+  const user = useAuthStore((s) => s.user)
+  const location = useLocation()
+  const { pathname } = location
+  const locationState = location.state as { title?: string } | null
+
+  const currentPageTitle =
+    locationState?.title ??
+    NAV_ITEMS.find((item) => (item.to === '/' ? pathname === '/' : pathname.startsWith(item.to)))?.pageTitle ??
+    'Dashboard'
 
   const toggleSidebar = useCallback(() => {
     setCollapsed((c) => {
@@ -67,105 +84,50 @@ export function AppLayout() {
         </div>
 
         <nav id="app-sidebar-nav" className="flex flex-col gap-1 max-md:flex-row max-md:flex-wrap max-md:flex-1">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 p-2.5 px-3 rounded-lg text-[15px] font-medium text-text no-underline transition-[background,color] duration-150 relative
-               hover:text-text-h hover:bg-accent-bg
-               ${isActive ? 'text-text-h bg-accent-bg border border-accent-border p-[9px] px-[11px]' : ''}
-               ${collapsed ? 'justify-center max-md:justify-start' : ''}`
-            }
-            title="Dashboard"
-          >
-            <DashboardIcon />
-            <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Dashboard</span>
-          </NavLink>
-          <NavLink
-            to="/bestand"
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 p-2.5 px-3 rounded-lg text-[15px] font-medium text-text no-underline transition-[background,color] duration-150 relative
-               hover:text-text-h hover:bg-accent-bg
-               ${isActive ? 'text-text-h bg-accent-bg border border-accent-border p-[9px] px-[11px]' : ''}
-               ${collapsed ? 'justify-center max-md:justify-start' : ''}`
-            }
-            title="Bestand"
-          >
-            <InventoryIcon />
-            <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Bestand</span>
-          </NavLink>
-          <NavLink
-            to="/fakturierter-bestand"
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 p-2.5 px-3 rounded-lg text-[15px] font-medium text-text no-underline transition-[background,color] duration-150 relative
-               hover:text-text-h hover:bg-accent-bg
-               ${isActive ? 'text-text-h bg-accent-bg border border-accent-border p-[9px] px-[11px]' : ''}
-               ${collapsed ? 'justify-center max-md:justify-start' : ''}`
-            }
-            title="Fakturierter Bestand"
-          >
-            <BillingStockIcon />
-            <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Fakt. Bestand</span>
-          </NavLink>
-          <NavLink
-            to="/forecast-nicht-fakturiert"
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 p-2.5 px-3 rounded-lg text-[15px] font-medium text-text no-underline transition-[background,color] duration-150 relative
-               hover:text-text-h hover:bg-accent-bg
-               ${isActive ? 'text-text-h bg-accent-bg border border-accent-border p-[9px] px-[11px]' : ''}
-               ${collapsed ? 'justify-center max-md:justify-start' : ''}`
-            }
-            title="Forecast"
-          >
-            <ForecastIcon />
-            <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Forecast</span>
-          </NavLink>
-          <NavLink
-            to="/forecast-nicht-fakturiert-naechster-monat"
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 p-2.5 px-3 rounded-lg text-[15px] font-medium text-text no-underline transition-[background,color] duration-150 relative
-               hover:text-text-h hover:bg-accent-bg
-               ${isActive ? 'text-text-h bg-accent-bg border border-accent-border p-[9px] px-[11px]' : ''}
-               ${collapsed ? 'justify-center max-md:justify-start' : ''}`
-            }
-            title="Forecast nächster Monat"
-          >
-            <ForecastIcon />
-            <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Forecast N+1</span>
-          </NavLink>
-          <NavLink
-            to="/profile"
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 p-2.5 px-3 rounded-lg text-[15px] font-medium text-text no-underline transition-[background,color] duration-150 relative
-               hover:text-text-h hover:bg-accent-bg
-               ${isActive ? 'text-text-h bg-accent-bg border border-accent-border p-[9px] px-[11px]' : ''}
-               ${collapsed ? 'justify-center max-md:justify-start' : ''}`
-            }
-            title="Profil"
-          >
-            <ProfileIcon />
-            <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Profil</span>
-          </NavLink>
+          {NAV_ITEMS.map(({ to, pageTitle, navLabel, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              state={{ title: pageTitle }}
+              end={to === '/'}
+              className={({ isActive }) =>
+                `flex items-center gap-2.5 p-2.5 px-3 rounded-lg text-[15px] font-medium text-text no-underline transition-[background,color] duration-150 relative
+                 hover:text-text-h hover:bg-accent-bg
+                 ${isActive ? 'text-text-h bg-accent-bg border border-accent-border p-[9px] px-[11px]' : ''}
+                 ${collapsed ? 'justify-center max-md:justify-start' : ''}`
+              }
+              title={pageTitle}
+            >
+              <Icon />
+              <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>{navLabel}</span>
+            </NavLink>
+          ))}
         </nav>
-        <button
-          type="button"
-          className={`
-            mt-auto flex items-center justify-start gap-2.5 font-inherit font-medium p-2.5 px-3.5 rounded-lg cursor-pointer text-text-h bg-transparent border border-border transition-[border-color,box-shadow] duration-200
-            hover:border-accent-border hover:shadow-custom
+        <div className={`mt-auto flex flex-col items-center justify-start gap-2.5 font-inherit font-medium p-2.5 px-3.5 rounded-lg cursor-pointer text-text-h bg-transparent
+           
             max-md:mt-0
+            ${collapsed ? 'justify-center p-2.5 px-2.5' : ''}`}>
+          <span className={`text-sm text-text-h font-medium ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>{user?.email}</span>
+          <button
+            type="button"
+            className={`
+            flex items-center justify-start gap-2.5 font-inherit font-medium p-2.5 px-3.5 rounded-lg cursor-pointer text-text-h bg-transparent border border-border transition-[border-color,box-shadow] duration-200
+            hover:border-accent-border hover:shadow-custom
             ${collapsed ? 'justify-center p-2.5 px-2.5' : ''}
           `}
-          onClick={() => logout()}
-          title="Abmelden"
-        >
-          <LogoutIcon />
-          <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Abmelden</span>
-        </button>
-      </aside>
+            onClick={() => logout()}
+            title="Abmelden"
+          >
+            <LogoutIcon />
+            <span className={`transition-opacity duration-150 ${collapsed ? 'sr-only max-md:not-sr-only' : 'block'}`}>Abmelden</span>
+          </button>
+        </div>
+      </aside >
       <div className="flex-1 min-w-0 p-7 px-8 pb-10 box-border overflow-y-auto max-md:p-5 max-md:px-4 max-md:pb-8">
+        <h2 className="m-0 mb-4 text-2xl font-semibold text-text-h">{currentPageTitle}</h2>
         <Outlet />
       </div>
-    </div>
+    </div >
   )
 }
 

@@ -52,7 +52,6 @@ export function ProfilePage() {
 
   return (
     <><div className="max-w-[640px]">
-      <h1 className="text-[28px] -tracking-[0.03em] m-0 mb-3 text-left">Profil</h1>
       <p className="m-0 mb-6 text-base leading-relaxed text-text text-left">
         Anzeigename und E-Mail sind im Client zwischengespeichert (Zustand + localStorage).
         Die API-Sitzung selbst befindet sich in einem HttpOnly-Cookie — vergleichen Sie dies mit dem

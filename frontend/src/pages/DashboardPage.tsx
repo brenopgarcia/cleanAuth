@@ -1,3 +1,11 @@
+import { getStandzeitToneClass } from '../lib/standzeit-tone'
+import {
+  LEFT_TABLE_CONFIG,
+  RIGHT_TABLE_CONFIG,
+  type DashboardColumnKey,
+  type DashboardTableConfig,
+} from './dashboard-table-config'
+
 type ReportRow = {
   label: string
   ist: string
@@ -8,6 +16,104 @@ type ReportRow = {
   bgwPct: string
   bgwEh?: string
   deltaVj?: string
+}
+
+const COLUMN_HEADER_LABELS: Record<DashboardColumnKey, string> = {
+  label: ' ',
+  ist: 'IST',
+  ant: 'Ant.',
+  avgSz: 'Ø SZ',
+  erloese: 'Erlöse',
+  bgwNet: 'BGW netto',
+  bgwPct: 'BGW %',
+  bgwEh: 'BGW/EH',
+  deltaVj: 'Abw.',
+}
+
+type ReportTotals = {
+  count: number
+  avgSz: number
+  erloese: number
+  bgwNet: number
+  bgwPct: number
+  bgwEh: number
+  abw: number
+  riskOver90Pct: number
+  riskOver90Euro: number
+}
+
+function parseEuro(value: string): number {
+  const normalized = value.replace(/[^\d,-]/g, '').replace(/\./g, '').replace(',', '.')
+  const parsed = Number.parseFloat(normalized)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+function parseNumber(value: string): number {
+  const normalized = value.replace(/[^\d,-]/g, '').replace(',', '.')
+  const parsed = Number.parseFloat(normalized)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+function parseDelta(value: string): number {
+  const numeric = parseNumber(value)
+  if (!numeric) return 0
+  if (value.includes('↓')) return -Math.abs(numeric)
+  if (value.includes('↑')) return Math.abs(numeric)
+  return numeric
+}
+
+function normalizeStandzeitLabel(label: string): string {
+  return label.replace(/\s/g, '')
+}
+
+function isOver90Standzeit(label: string): boolean {
+  const normalized = normalizeStandzeitLabel(label)
+  if (normalized.startsWith('>')) return true
+  const [startRaw] = normalized.split('-')
+  const start = Number.parseInt(startRaw, 10)
+  return Number.isFinite(start) && start >= 91
+}
+
+function formatInteger(value: number): string {
+  return Math.round(value).toLocaleString('de-DE')
+}
+
+function formatDecimal(value: number): string {
+  return value.toLocaleString('de-DE', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })
+}
+
+function formatPercent(value: number): string {
+  return `${formatDecimal(value)}%`
+}
+
+function formatEuro(value: number): string {
+  return `${value.toLocaleString('de-DE', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })} €`
+}
+
+function calculateTotals(rows: ReportRow[]): ReportTotals {
+  const count = rows.reduce((acc, row) => acc + parseNumber(row.ist), 0)
+  const weightedAvgSum = rows.reduce((acc, row) => acc + parseNumber(row.ist) * parseNumber(row.avgSz), 0)
+  const erloese = rows.reduce((acc, row) => acc + parseEuro(row.erloese), 0)
+  const bgwNet = rows.reduce((acc, row) => acc + parseEuro(row.bgwNet), 0)
+  const abw = rows.reduce((acc, row) => acc + parseDelta(row.deltaVj ?? ''), 0)
+  const riskRows = rows.filter((row) => isOver90Standzeit(row.label))
+  const riskCount = riskRows.reduce((acc, row) => acc + parseNumber(row.ist), 0)
+  const riskOver90Euro = riskRows.reduce((acc, row) => {
+    const value = parseEuro(row.bgwNet)
+    return value > 0 ? acc + value : acc
+  }, 0)
+  const avgSz = count > 0 ? weightedAvgSum / count : 0
+  const bgwPct = erloese !== 0 ? (bgwNet / erloese) * 100 : 0
+  const bgwEh = count > 0 ? bgwNet / count : 0
+  const riskOver90Pct = count > 0 ? (riskCount / count) * 100 : 0
+
+  return { count, avgSz, erloese, bgwNet, bgwPct, bgwEh, abw, riskOver90Pct, riskOver90Euro }
 }
 
 const currentMonthLeft: ReportRow[] = [
@@ -35,63 +141,114 @@ const currentMonthRight: ReportRow[] = [
   { label: '> 360', ist: '0', ant: '0%', avgSz: '0', erloese: '0 €', bgwNet: '0 €', bgwPct: '0%', bgwEh: '0 €', deltaVj: '' },
 ]
 
-function getStandzeitToneClass(label: string) {
-  const normalized = label.replace(/\s/g, '')
-  if (normalized === '0-30') return 'bg-[#00d64f] text-black'
-  if (normalized === '31-60') return 'bg-[#c6ff00] text-black'
-  if (normalized === '61-90') return 'bg-[#ffc928] text-black'
-  if (normalized === '91-120') return 'bg-[#cfcfcf] text-black'
-  if (normalized === '121-150') return 'bg-[#bebebe] text-black'
-  if (normalized === '151-180') return 'bg-[#adadad] text-black'
-  if (normalized === '181-360') return 'bg-[#9b9b9b] text-black'
-  if (normalized === '>360') return 'bg-[#888888] text-white'
+function cellClass(column: DashboardColumnKey, value: string) {
+  if ((column === 'bgwNet' || column === 'bgwPct' || column === 'bgwEh' || column === 'deltaVj') && value.includes('-')) {
+    return 'text-red-600'
+  }
   return ''
 }
 
-function ReportTable({ title, rows, totals }: { title: string; rows: ReportRow[]; totals: string }) {
+function getRowCellValue(row: ReportRow, column: DashboardColumnKey): string {
+  if (column === 'label') return row.label
+  if (column === 'ist') return row.ist
+  if (column === 'ant') return row.ant
+  if (column === 'avgSz') return row.avgSz
+  if (column === 'erloese') return row.erloese
+  if (column === 'bgwNet') return row.bgwNet
+  if (column === 'bgwPct') return row.bgwPct
+  if (column === 'bgwEh') return row.bgwEh ?? ''
+  return row.deltaVj ?? ''
+}
+
+function getTotalCellValue(totals: ReportTotals, column: DashboardColumnKey): string {
+  if (column === 'label') return 'gesamt:'
+  if (column === 'ist') return formatInteger(totals.count)
+  if (column === 'ant') return ''
+  if (column === 'avgSz') return formatDecimal(totals.avgSz)
+  if (column === 'erloese') return formatEuro(totals.erloese)
+  if (column === 'bgwNet') return formatEuro(totals.bgwNet)
+  if (column === 'bgwPct') return formatPercent(totals.bgwPct)
+  if (column === 'bgwEh') return formatEuro(totals.bgwEh)
+  return formatEuro(totals.abw)
+}
+
+function getRiskCellValue(totals: ReportTotals, column: DashboardColumnKey): string {
+  if (column === 'label') return 'verk. Risiko > 90 Tg.:'
+  if (column === 'ist') return formatPercent(totals.riskOver90Pct)
+  if (column === 'bgwNet') return formatEuro(totals.riskOver90Euro)
+  return ''
+}
+
+function ReportTable({ title, rows, config }: { title: string; rows: ReportRow[]; config: DashboardTableConfig }) {
+  const totals = calculateTotals(rows)
+
   return (
     <div className="rounded-xl border border-border bg-bg p-3 shadow-custom overflow-x-auto">
       <h3 className="m-0 mb-2 text-sm font-semibold text-text-h">{title}</h3>
       <table className="w-full min-w-[700px] text-xs border-collapse">
         <thead>
           <tr className="border-b border-border">
-            <th className="text-left p-1"> </th>
-            <th className="text-right p-1">IST</th>
-            <th className="text-right p-1">Ant.</th>
-            <th className="text-right p-1">Ø SZ</th>
-            <th className="text-right p-1">Erlöse</th>
-            <th className="text-right p-1">BGW netto</th>
-            <th className="text-right p-1">BGW %</th>
-            <th className="text-right p-1">BGW/EH</th>
-            <th className="text-right p-1">Abw.</th>
+            {config.columns.map((column) => (
+              <th key={column} className={`${column === 'label' ? 'text-left' : 'text-right'} p-1`}>
+                {COLUMN_HEADER_LABELS[column]}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
             <tr key={row.label} className="border-b border-border/50">
-              <td className={`p-1 ${getStandzeitToneClass(row.label)} ${getStandzeitToneClass(row.label) ? 'text-right font-medium' : ''}`}>{row.label}</td>
-              <td className="p-1 text-right">{row.ist}</td>
-              <td className="p-1 text-right">{row.ant}</td>
-              <td className="p-1 text-right">{row.avgSz}</td>
-              <td className="p-1 text-right">{row.erloese}</td>
-              <td className={`p-1 text-right ${row.bgwNet.includes('-') ? 'text-red-600' : ''}`}>{row.bgwNet}</td>
-              <td className={`p-1 text-right ${row.bgwPct.includes('-') ? 'text-red-600' : ''}`}>{row.bgwPct}</td>
-              <td className={`p-1 text-right ${String(row.bgwEh).includes('-') ? 'text-red-600' : ''}`}>{row.bgwEh ?? ''}</td>
-              <td className={`p-1 text-right ${String(row.deltaVj).includes('-') ? 'text-red-600' : ''}`}>{row.deltaVj ?? ''}</td>
+              {config.columns.map((column) => {
+                const value = getRowCellValue(row, column)
+                if (column === 'label') {
+                  return (
+                    <td key={column} className={`p-1 ${getStandzeitToneClass(row.label)} ${getStandzeitToneClass(row.label) ? 'text-right font-medium' : ''}`}>
+                      {value}
+                    </td>
+                  )
+                }
+
+                return (
+                  <td key={column} className={`p-1 text-right ${cellClass(column, value)}`}>
+                    {value}
+                  </td>
+                )
+              })}
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          <tr className="border-t border-border font-semibold">
+            {config.columns.map((column) => {
+              const value = getTotalCellValue(totals, column)
+              return (
+                <td key={column} className={`p-1 ${column === 'label' ? 'text-left' : 'text-right'} ${column === 'deltaVj' && totals.abw < 0 ? 'text-red-600' : ''}`}>
+                  {value}
+                </td>
+              )
+            })}
+          </tr>
+          {config.showRiskRow && (
+            <>
+              <tr><td className="p-3" /></tr>
+              <tr className="font-semibold">
+                {config.columns.map((column) => {
+                  const value = getRiskCellValue(totals, column)
+                  return (
+                    <td key={column} className={`p-1 ${column === 'label' || column === 'ist' ? 'text-left border border-black' : 'text-right'}`}>
+                      {value}
+                    </td>
+                  )
+                })}
+              </tr></>
+          )}
+        </tfoot>
       </table>
-      <p className="m-0 mt-2 text-xs font-semibold">{totals}</p>
     </div>
   )
 }
 
 export function DashboardPage() {
-
-
-
-
   return (
     <div>
 
@@ -105,32 +262,32 @@ export function DashboardPage() {
         <ReportTable
           title="Entwicklung verkaufter aktueller Monat nach Standzeitgruppen"
           rows={currentMonthLeft}
-          totals="gesamt: 108 | Ø SZ: 81 | Erlöse netto: 2.525.082 € | BGW netto: 116.257 € | BGW in %: 4,6% | BGW je EH: 1.076 €"
+          config={LEFT_TABLE_CONFIG}
         />
         <ReportTable
           title="Entwicklung verkaufter aktueller Monat nach Standzeitgruppen"
           rows={currentMonthRight}
-          totals="gesamt: 108 | Ø SZ: 81 | Erlöse netto: 2.525.082 € | BGW netto: 116.257 € | BGW in %: 4,6% | BGW je EH: 1.076 €"
+          config={RIGHT_TABLE_CONFIG}
         />
         <ReportTable
           title="Entwicklung verkaufter Bestand WJ 2025/2026 nach Standzeitgruppen"
           rows={currentMonthLeft}
-          totals="gesamt: ### | Ø SZ: 90 | Erlöse netto: ########## | BGW netto: 624.885 € | BGW in %: 2,4% | BGW je EH: 554 €"
+          config={LEFT_TABLE_CONFIG}
         />
         <ReportTable
           title="Entwicklung verkaufter Bestand WJ 2025/2026 nach Standzeitgruppen"
           rows={currentMonthRight}
-          totals="gesamt: ### | Ø SZ: 90 | Erlöse netto: ########## | BGW netto: 624.885 € | BGW in %: 2,4% | BGW je EH: 554 €"
+          config={RIGHT_TABLE_CONFIG}
         />
         <ReportTable
           title="Entwicklung verkaufter Bestand WJ 2024/2025 nach Standzeitgruppen"
           rows={currentMonthLeft}
-          totals="gesamt: 946 | Ø SZ: 98 | Erlöse netto: ########## | BGW netto: 982.818 € | BGW in %: 4,7% | BGW je EH: 1.039 €"
+          config={LEFT_TABLE_CONFIG}
         />
         <ReportTable
           title="Entwicklung verkaufter Bestand WJ 2024/2025 nach Standzeitgruppen"
           rows={currentMonthRight}
-          totals="gesamt: 946 | Ø SZ: 98 | Erlöse netto: ########## | BGW netto: 982.818 € | BGW in %: 4,7% | BGW je EH: 1.039 €"
+          config={RIGHT_TABLE_CONFIG}
         />
       </div>
 

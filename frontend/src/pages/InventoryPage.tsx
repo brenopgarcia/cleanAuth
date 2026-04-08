@@ -11,6 +11,7 @@ import {
 } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { Chart } from 'react-chartjs-2'
+import { getStandzeitToneClass } from '../lib/standzeit-tone'
 
 ChartJS.register(
   CategoryScale,
@@ -161,13 +162,6 @@ const kpiToneClass: Record<InventoryRow['kpiTone'], string> = {
   gray: 'bg-[#d9d9d9] text-black',
 }
 
-const intervalToneClass: Record<InventoryRow['intervalTone'], string> = {
-  green: 'bg-[#00d64f] text-black',
-  lime: 'bg-[#c6ff00] text-black',
-  yellow: 'bg-[#ffc928] text-black',
-  gray: 'bg-[#d9d9d9] text-black',
-}
-
 const chartLabels = mockInventoryRows.map((row) => row.interval)
 const chartIstValues = mockInventoryRows.map((row) => row.isCount)
 const chartTargetValues = mockInventoryRows.map((row) => row.targetStock)
@@ -306,7 +300,7 @@ export function InventoryPage() {
           <tbody>
             {mockInventoryRows.map((row) => (
               <tr key={row.interval} className="border-b border-border/60">
-                <td className={`p-2 text-right font-medium ${intervalToneClass[row.intervalTone]}`}>{row.interval}</td>
+                <td className={`p-2 text-right font-medium ${getStandzeitToneClass(row.interval)}`}>{row.interval}</td>
                 <td className="p-2">{row.isCount}</td>
                 <td className="p-2">{row.percentage}</td>
                 <td className="p-2">{row.avgDays}</td>
@@ -326,10 +320,10 @@ export function InventoryPage() {
           <tfoot>
             <tr className="font-semibold">
               <td className="p-2 text-right">gesamt:</td>
-              <td className="p-2">413</td>
+              <td className="p-2">{mockInventoryRows.reduce((acc, row) => acc + row.isCount, 0)}</td>
               <td className="p-2" />
               <td className="p-2">53,2</td>
-              <td className="p-2">9.301.729 €</td>
+              <td className="p-2">{mockInventoryRows.reduce((acc, row) => acc + Number(row.netStockEuro), 0).toFixed(0)} €</td>
               <td className="p-2" />
               <td className="p-2" />
               <td className="p-2" />
@@ -340,7 +334,7 @@ export function InventoryPage() {
         </table>
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-3 text-sm">
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-sm w-full">
         <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom">
           Bestandsabbau im Risiko: <strong>11</strong>
         </div>
@@ -355,7 +349,7 @@ export function InventoryPage() {
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-border bg-bg shadow-custom p-4">
+      <div className="mt-5 rounded-xl border border-border bg-bg shadow-custom p-4">
         <div className="h-[360px]">
           <Chart type="bar" data={chartData} options={chartOptions} />
         </div>

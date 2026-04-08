@@ -11,6 +11,7 @@ import {
 } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { Chart } from 'react-chartjs-2'
+import { getStandzeitToneClass } from '../lib/standzeit-tone'
 
 ChartJS.register(
   CategoryScale,
@@ -163,13 +164,6 @@ const rows: BillingStockRow[] = [
   },
 ]
 
-const intervalToneClass: Record<BillingStockRow['intervalTone'], string> = {
-  green: 'bg-[#00d64f] text-black',
-  lime: 'bg-[#c6ff00] text-black',
-  yellow: 'bg-[#ffc928] text-black',
-  gray: 'bg-[#d9d9d9] text-black',
-}
-
 const labels = rows.map((row) => row.interval)
 const istSeries = rows.map((row) => row.ist)
 const targetSeries = rows.map((row) => row.targetSales)
@@ -309,7 +303,7 @@ export function BillingStockPage() {
           <tbody>
             {rows.map((row) => (
               <tr key={row.interval} className="border-b border-border/60">
-                <td className={`p-2 text-right font-medium ${intervalToneClass[row.intervalTone]}`}>{row.interval}</td>
+                <td className={`p-2 text-right font-medium ${getStandzeitToneClass(row.interval)}`}>{row.interval}</td>
                 <td className="p-2">{row.ist}</td>
                 <td className="p-2">{row.share}</td>
                 <td className="p-2">{row.avgSalesDays}</td>
@@ -337,30 +331,24 @@ export function BillingStockPage() {
             </tr>
           </tfoot>
         </table>
-
-        <div className="mt-5 flex flex-wrap gap-3 text-sm">
-          <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom flex items-center">
-            Risiko in % &gt; 90Tg: <span className="text-red-600 font-semibold">&nbsp;38%</span>
-          </div>
-          <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom">
-            <div className="text-xs">davon</div>
-            <div className="text-xs">Bestands-bereinigung: <span className="text-red-600 font-semibold">17</span></div>
-          </div>
+      </div>
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-sm w-full">
+        <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom">
+          Risiko in % &gt; 90Tg: <span className="text-red-600 font-semibold">&nbsp;38%</span>
         </div>
-
-        <div className="mt-4 flex flex-wrap items-stretch gap-3 text-sm">
-          <div className="ml-auto grid gap-2 min-w-[180px]">
-            <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom">
-              Monatslager: <strong>IST 2,5</strong> | <strong>Soll 2,0</strong>
-            </div>
-            <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom">
-              Lagerumschlag: <strong>IST 4,8</strong> | <strong>Soll 6,0</strong>
-            </div>
-          </div>
+        <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom">
+          <div className="text-xs">davon</div>
+          <div className="text-xs">Bestands-bereinigung: <span className="text-red-600 font-semibold">17</span></div>
+        </div>
+        <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom">
+          Monatslager: <strong>IST 2,5</strong> | <strong>Soll 2,0</strong>
+        </div>
+        <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom flex items-center">
+          Lagerumschlag: <strong>IST 4,8</strong> | <strong>Soll 6,0</strong>
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-border bg-bg shadow-custom p-4">
+      <div className="mt-5 rounded-xl border border-border bg-bg shadow-custom p-4">
         <div className="h-[360px]">
           <Chart type="bar" data={chartData} options={chartOptions} />
         </div>

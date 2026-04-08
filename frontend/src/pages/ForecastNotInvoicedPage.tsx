@@ -8,6 +8,7 @@ import {
   Tooltip,
 } from 'chart.js'
 import { Bar } from 'react-chartjs-2'
+import { getStandzeitToneClass } from '../lib/standzeit-tone'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
@@ -33,13 +34,6 @@ const rows: ForecastRow[] = [
   { interval: '181-360', intervalTone: 'gray', ist: 1, share: '3%', avgSalesDays: '210,0', ueNetEuro: '14.400 €', bgwNetEuro: '-941 €', bgwShare: '-6,4%', bgwTone: 'negative' },
   { interval: '> 360', intervalTone: 'gray', ist: 0, share: '0%', avgSalesDays: '0,0', ueNetEuro: '0 €', bgwNetEuro: '0 €', bgwShare: '0%', bgwTone: 'neutral' },
 ]
-
-const intervalToneClass: Record<ForecastRow['intervalTone'], string> = {
-  green: 'bg-[#00d64f] text-black',
-  lime: 'bg-[#c6ff00] text-black',
-  yellow: 'bg-[#ffc928] text-black',
-  gray: 'bg-[#d9d9d9] text-black',
-}
 
 const chartData = {
   labels: rows.map((r) => r.interval),
@@ -107,7 +101,7 @@ export function ForecastNotInvoicedPage() {
           <tbody>
             {rows.map((row) => (
               <tr key={row.interval} className="border-b border-border/60">
-                <td className={`p-2 text-right font-medium ${intervalToneClass[row.intervalTone]}`}>{row.interval}</td>
+                <td className={`p-2 text-right font-medium ${getStandzeitToneClass(row.interval)}`}>{row.interval}</td>
                 <td className="p-2">{row.ist}</td>
                 <td className="p-2">{row.share}</td>
                 <td className="p-2">{row.avgSalesDays}</td>
@@ -129,17 +123,19 @@ export function ForecastNotInvoicedPage() {
             </tr>
           </tfoot>
         </table>
-        <div className="mt-5 flex flex-wrap gap-3 text-sm">
-          <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom flex items-center">
-            Risiko in % &gt; 90Tg: <span className="text-red-600 font-semibold">&nbsp;47,5%</span>
-          </div></div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-border bg-bg shadow-custom p-4">
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-sm">
+        <div className="rounded-lg border border-border bg-bg px-3 py-2 shadow-custom flex items-center">
+          Risiko in % &gt; 90Tg: <span className="text-red-600 font-semibold">&nbsp;47,5%</span>
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-xl border border-border bg-bg shadow-custom p-4">
         <div className="h-[360px]">
           <Bar data={chartData} options={chartOptions} />
         </div>
       </div>
-    </div>
+    </div >
   )
 }
