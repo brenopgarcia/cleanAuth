@@ -4,6 +4,7 @@ import type { InternalAxiosRequestConfig } from 'axios'
 declare module 'axios' {
   interface InternalAxiosRequestConfig {
     _retryAfterRefresh?: boolean
+    _retryAfterCsrf?: boolean
   }
 }
 
@@ -23,12 +24,15 @@ export async function fetchCsrfToken(): Promise<void> {
   xsrfToken = typeof data?.token === 'string' ? data.token : null
 }
 
-function isAuthExemptUrl(url: string | undefined): boolean {
-  if (!url) return true
+export function isAuthExemptUrl(url: string | undefined): boolean {
+  if (!url) {
+    return true
+  }
   return (
     url.includes('/auth/login') ||
     url.includes('/auth/register') ||
     url.includes('/auth/refresh') ||
+    url.includes('/admin/auth/') ||
     url.includes('/antiforgery/token')
   )
 }
@@ -47,12 +51,34 @@ function refreshSession(): Promise<void> {
   return refreshPromise
 }
 
-api.interceptors.request.use((config) => {
-  const method = (config.method ?? 'get').toLowerCase()
-  if (
-    xsrfToken &&
-    !['get', 'head', 'options', 'trace'].includes(method)
-  ) {
+export function isUnsafeMethod(method: string | undefined): boolean {
+  const normalized = (method ?? 'get').toLowerCase()
+  return !['get', 'head', 'options', 'trace'].includes(normalized)
+}
+
+export function isLikelyCsrfError(payload: unknown): boolean {
+  if (!payload || typeof payload !== 'object') {
+    return false
+  }
+
+  const data = payload as { message?: unknown; error?: unknown; title?: unknown }
+  const joined = [data.message, data.error, data.title]
+    .filter((v) => typeof v === 'string')
+    .join(' ')
+    .toLowerCase()
+  return joined.includes('csrf') || joined.includes('antiforgery')
+}
+
+api.interceptors.request.use(async (config) => {
+  if (isUnsafeMethod(config.method) && !xsrfToken) {
+    try {
+      await fetchCsrfToken()
+    } catch {
+      // continue; server may still accept request depending on endpoint policy
+    }
+  }
+
+  if (xsrfToken && isUnsafeMethod(config.method)) {
     config.headers['X-XSRF-TOKEN'] = xsrfToken
   }
   return config
@@ -64,6 +90,20 @@ api.interceptors.response.use(
     const original = axios.isAxiosError(error)
       ? (error.config as InternalAxiosRequestConfig | undefined)
       : undefined
+
+    if (
+      axios.isAxiosError(error) &&
+      original &&
+      !original._retryAfterCsrf &&
+      isUnsafeMethod(original.method) &&
+      (error.response?.status === 400 || error.response?.status === 403) &&
+      isLikelyCsrfError(error.response?.data)
+    ) {
+      original._retryAfterCsrf = true
+      await fetchCsrfToken()
+      return api.request(original)
+    }
+
     if (
       !axios.isAxiosError(error) ||
       error.response?.status !== 401 ||

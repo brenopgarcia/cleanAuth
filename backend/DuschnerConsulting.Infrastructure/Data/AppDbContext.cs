@@ -1,20 +1,7 @@
-using DuschnerConsulting.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DuschnerConsulting.Infrastructure.Data;
 
-public class AppDbContext : DbContext
-{
-    public AppDbContext(DbContextOptions<AppDbContext> options)
-        : base(options)
-    {
-    }
-
-    public DbSet<User> Users => Set<User>();
-    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-    }
-}
+// Intentionally left as a legacy placeholder; the app now uses:
+// - PublicDbContext (public schema tables)
+// - TenantDbContext (tenant schema tables)

@@ -17,7 +17,6 @@ const queryClient = new QueryClient({
 })
 
 async function start() {
-  await useAuthStore.persist.rehydrate()
   await useAuthStore.getState().bootstrap()
 
   createRoot(document.getElementById('root')!).render(

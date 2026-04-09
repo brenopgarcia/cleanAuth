@@ -11,6 +11,8 @@ export const authUserSchema = z.object({
   id: z.string(),
   email: z.string(),
   name: z.string().optional(),
+  role: z.string().optional(),
+  perms: z.array(z.string()).optional(),
 })
 
 export type AuthUser = z.infer<typeof authUserSchema>

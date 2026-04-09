@@ -6,7 +6,7 @@ namespace DuschnerConsulting.Infrastructure.Data;
 
 public static class DbSeeder
 {
-    public static async Task SeedDemoUserAsync(AppDbContext db, IPasswordHasher passwordHasher, CancellationToken cancellationToken = default)
+    public static async Task SeedDemoUserAsync(TenantDbContext db, IPasswordHasher passwordHasher, CancellationToken cancellationToken = default)
     {
         if (await db.Users.AnyAsync(cancellationToken))
             return;

@@ -12,17 +12,19 @@ internal static class ForwardedHeadersSetup
             .Configure<IConfiguration, IHostEnvironment>((options, config, env) =>
             {
                 options.ForwardedHeaders =
-                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
 
                 var forwardLimit = config.GetValue<int?>("ForwardedHeaders:ForwardLimit");
                 if (forwardLimit is > 0)
+                {
                     options.ForwardLimit = forwardLimit;
+                }
 
                 var trustAll = config.GetValue<bool>("ForwardedHeaders:TrustAllProxies");
                 if (trustAll && env.IsDevelopment())
                 {
                     options.KnownProxies.Clear();
-                    options.KnownIPNetworks.Clear();
+                    options.KnownNetworks.Clear();
                     return;
                 }
 
@@ -30,14 +32,18 @@ internal static class ForwardedHeadersSetup
                          ?? Array.Empty<string>())
                 {
                     if (IPAddress.TryParse(raw.Trim(), out var ip))
+                    {
                         options.KnownProxies.Add(ip);
+                    }
                 }
 
                 foreach (var cidr in config.GetSection("ForwardedHeaders:TrustedNetworks").Get<string[]>()
                          ?? Array.Empty<string>())
                 {
-                    if (System.Net.IPNetwork.TryParse(cidr.Trim(), out var net))
-                        options.KnownIPNetworks.Add(net);
+                    if (Microsoft.AspNetCore.HttpOverrides.IPNetwork.TryParse(cidr.Trim(), out var net))
+                    {
+                        options.KnownNetworks.Add(net);
+                    }
                 }
             });
     }

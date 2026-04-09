@@ -7,9 +7,9 @@ namespace DuschnerConsulting.Infrastructure.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly AppDbContext _db;
+    private readonly TenantDbContext _db;
 
-    public UserRepository(AppDbContext db) => _db = db;
+    public UserRepository(TenantDbContext db) => _db = db;
 
     public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {

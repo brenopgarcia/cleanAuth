@@ -2,8 +2,11 @@ using DuschnerConsulting.Api.Auth;
 using DuschnerConsulting.Application.Abstractions;
 using DuschnerConsulting.Application.Commands.Login;
 using DuschnerConsulting.Application.Commands.Register;
+using DuschnerConsulting.Application.Cqrs;
+using DuschnerConsulting.Application.Contracts;
 using DuschnerConsulting.Application.DTOs;
-using MediatR;
+using FluentValidation;
+using DuschnerConsulting.Api.Validation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -14,13 +17,27 @@ namespace DuschnerConsulting.Api.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly ISender _mediator;
+    private readonly ICommandDispatcher _commands;
     private readonly IRefreshTokenService _refreshTokens;
+    private readonly IPasswordResetService _passwordResetService;
+    private readonly IValidator<LoginRequest> _loginValidator;
+    private readonly IValidator<RegisterRequest> _registerValidator;
+    private readonly IValidator<ResetPasswordByTokenRequest> _resetPasswordByTokenValidator;
 
-    public AuthController(ISender mediator, IRefreshTokenService refreshTokens)
+    public AuthController(
+        ICommandDispatcher commands,
+        IRefreshTokenService refreshTokens,
+        IPasswordResetService passwordResetService,
+        IValidator<LoginRequest> loginValidator,
+        IValidator<RegisterRequest> registerValidator,
+        IValidator<ResetPasswordByTokenRequest> resetPasswordByTokenValidator)
     {
-        _mediator = mediator;
+        _commands = commands;
         _refreshTokens = refreshTokens;
+        _passwordResetService = passwordResetService;
+        _loginValidator = loginValidator;
+        _registerValidator = registerValidator;
+        _resetPasswordByTokenValidator = resetPasswordByTokenValidator;
     }
 
     [HttpPost("login")]
@@ -30,12 +47,19 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
-            return ValidationProblem(ModelState);
+        var validation = await _loginValidator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return BadRequest(validation.ToDictionary());
+        }
 
-        var result = await _mediator.Send(new LoginCommand(request.Email, request.Password), cancellationToken);
+        var result = await _commands.Send<LoginCommand, AuthTicket?>(
+            new LoginCommand(request.Email, request.Password),
+            cancellationToken);
         if (result is null)
+        {
             return Unauthorized(new { message = "Invalid email or password." });
+        }
 
         await AppendSessionCookiesAsync(result, cancellationToken);
         return Ok(ToSession(result));
@@ -50,15 +74,20 @@ public class AuthController : ControllerBase
         [FromBody] RegisterRequest request,
         CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
-            return ValidationProblem(ModelState);
+        var validation = await _registerValidator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return BadRequest(validation.ToDictionary());
+        }
 
-        var result = await _mediator.Send(
+        var result = await _commands.Send<RegisterCommand, AuthTicket?>(
             new RegisterCommand(request.Email, request.Password, request.UserName),
             cancellationToken);
 
         if (result is null)
+        {
             return Conflict(new { message = "Unable to register with the provided information." });
+        }
 
         await AppendSessionCookiesAsync(result, cancellationToken);
         return StatusCode(StatusCodes.Status201Created, ToSession(result));
@@ -95,6 +124,38 @@ public class AuthController : ControllerBase
         var plaintext = Request.Cookies[AuthCookieNames.RefreshToken];
         await _refreshTokens.RevokeByPlaintextAsync(plaintext, cancellationToken);
         ClearSessionCookies();
+        return NoContent();
+    }
+
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> ResetPasswordByToken(
+        [FromBody] ResetPasswordByTokenRequest request,
+        [FromServices] ITenantContext tenantContext,
+        CancellationToken cancellationToken)
+    {
+        var validation = await _resetPasswordByTokenValidator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return BadRequest(validation.ToDictionary());
+        }
+
+        if (string.IsNullOrWhiteSpace(tenantContext.TenantSlug))
+        {
+            return BadRequest(new { message = "Tenant context is required." });
+        }
+
+        var ok = await _passwordResetService.ConsumeAsync(
+            request.Token,
+            request.Password,
+            tenantContext.TenantSlug,
+            cancellationToken);
+        if (!ok)
+        {
+            return BadRequest(new { message = "Invalid or expired reset token." });
+        }
+
         return NoContent();
     }
 

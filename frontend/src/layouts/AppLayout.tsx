@@ -10,6 +10,7 @@ import { ProfileIcon } from '../components/ProfileIcon'
 import { LogoutIcon } from '../components/LogoutIcon'
 import { ChevronLeftIcon } from '../components/ChevronLeftIcon'
 import { ChevronRightIcon } from '../components/ChevronRightIcon'
+import { useAccess } from '../hooks/useAccess'
 
 const SIDEBAR_COLLAPSED_KEY = 'app-sidebar-collapsed'
 const NAV_ITEMS = [
@@ -19,6 +20,8 @@ const NAV_ITEMS = [
   { to: '/forecast-nicht-fakturiert', pageTitle: 'Forecast', navLabel: 'Forecast', icon: ForecastIcon },
   { to: '/forecast-nicht-fakturiert-naechster-monat', pageTitle: 'Forecast N + 1', navLabel: 'Forecast N + 1', icon: ForecastIcon },
   { to: '/profile', pageTitle: 'Profil', navLabel: 'Profil', icon: ProfileIcon },
+  // Admin area (visible only for global admins)
+  { to: '/admin', pageTitle: 'Admin', navLabel: 'Admin', icon: ProfileIcon },
 ] as const
 
 const readCollapsed = (): boolean => {
@@ -42,6 +45,7 @@ export function AppLayout() {
   const logout = useAuthStore((s) => s.logout)
   const [collapsed, setCollapsed] = useState(readCollapsed)
   const user = useAuthStore((s) => s.user)
+  const { isAdmin } = useAccess()
   const location = useLocation()
   const { pathname } = location
   const locationState = location.state as { title?: string } | null
@@ -84,7 +88,7 @@ export function AppLayout() {
         </div>
 
         <nav id="app-sidebar-nav" className="flex flex-col gap-1 max-md:flex-row max-md:flex-wrap max-md:flex-1">
-          {NAV_ITEMS.map(({ to, pageTitle, navLabel, icon: Icon }) => (
+          {NAV_ITEMS.filter((item) => (item.to.startsWith('/admin') ? isAdmin : true)).map(({ to, pageTitle, navLabel, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}

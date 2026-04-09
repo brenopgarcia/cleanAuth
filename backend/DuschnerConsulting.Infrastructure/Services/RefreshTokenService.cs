@@ -12,21 +12,24 @@ namespace DuschnerConsulting.Infrastructure.Services;
 
 public class RefreshTokenService : IRefreshTokenService
 {
-    private readonly AppDbContext _db;
+    private readonly TenantDbContext _db;
     private readonly IUserRepository _users;
     private readonly IJwtTokenGenerator _jwtGen;
     private readonly IOptions<JwtSettings> _jwt;
+    private readonly ITenantContext _tenantContext;
 
     public RefreshTokenService(
-        AppDbContext db,
+        TenantDbContext db,
         IUserRepository users,
         IJwtTokenGenerator jwtGen,
-        IOptions<JwtSettings> jwt)
+        IOptions<JwtSettings> jwt,
+        ITenantContext tenantContext)
     {
         _db = db;
         _users = users;
         _jwtGen = jwtGen;
         _jwt = jwt;
+        _tenantContext = tenantContext;
     }
 
     public async Task<(string Plaintext, int MaxAgeSeconds)> CreateForUserAsync(
@@ -78,7 +81,12 @@ public class RefreshTokenService : IRefreshTokenService
         if (user is null)
             return new RefreshRotationInvalid();
 
-        var (accessToken, accessExpiresSec) = _jwtGen.CreateAccessToken(user);
+        if (string.IsNullOrWhiteSpace(_tenantContext.TenantSlug))
+        {
+            return new RefreshRotationInvalid();
+        }
+
+        var (accessToken, accessExpiresSec) = _jwtGen.CreateAccessToken(user, _tenantContext.TenantSlug);
 
         var now = DateTimeOffset.UtcNow;
         var newExpires = now.AddDays(_jwt.Value.RefreshTokenDays);

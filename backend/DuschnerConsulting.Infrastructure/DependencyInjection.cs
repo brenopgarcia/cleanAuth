@@ -18,13 +18,24 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite(connectionString));
+        services.AddDbContext<PublicDbContext>(options =>
+            options.UseNpgsql(connectionString));
+
+        services.AddScoped<TenantSearchPathInterceptor>();
+
+        services.AddDbContext<TenantDbContext>((sp, options) =>
+        {
+            options.UseNpgsql(connectionString);
+            options.AddInterceptors(sp.GetRequiredService<TenantSearchPathInterceptor>());
+        });
 
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IAdminUserRepository, AdminUserRepository>();
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddSingleton<IAdminJwtTokenGenerator, AdminJwtTokenGenerator>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+        services.AddScoped<IPasswordResetService, PasswordResetService>();
 
         return services;
     }

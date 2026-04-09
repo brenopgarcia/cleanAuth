@@ -1,6 +1,6 @@
 using DuschnerConsulting.Application.DTOs;
-using MediatR;
+using DuschnerConsulting.Application.Cqrs;
 
 namespace DuschnerConsulting.Application.Commands.Login;
 
-public record LoginCommand(string Email, string Password) : IRequest<AuthTicket?>;
+public sealed record LoginCommand(string Email, string Password) : ICommand<AuthTicket?>;

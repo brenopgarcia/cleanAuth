@@ -1,7 +1,7 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
 import api, { fetchCsrfToken } from '../lib/api'
 import { safeParseMeResponse } from '../schemas/me'
+import { safeParseAdminMeResponse } from '../schemas/adminMe'
 import { type AuthUser } from '../schemas/login'
 
 export type { AuthUser }
@@ -13,10 +13,8 @@ type AuthState = {
   bootstrap: () => Promise<void>
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
+export const useAuthStore = create<AuthState>()((set) => ({
+  user: null,
 
       setUser: (user) => set({ user }),
 
@@ -30,6 +28,28 @@ export const useAuthStore = create<AuthState>()(
               user: {
                 id: parsed.data.userId,
                 email: parsed.data.email,
+                role: parsed.data.role,
+                perms: parsed.data.perms,
+              },
+            })
+            return
+          } else {
+            // try admin session
+          }
+        } catch {
+          // try admin session
+        }
+
+        try {
+          const { data } = await api.get<unknown>('/admin/auth/me')
+          const parsed = safeParseAdminMeResponse(data)
+          if (parsed.success) {
+            set({
+              user: {
+                id: parsed.data.adminId,
+                email: parsed.data.email,
+                role: parsed.data.role,
+                perms: [],
               },
             })
           } else {
@@ -46,14 +66,11 @@ export const useAuthStore = create<AuthState>()(
         } catch {
           /* still clear client state if cookie expired or network failed */
         }
+        try {
+          await api.post('/admin/auth/logout')
+        } catch {
+          /* ignore */
+        }
         set({ user: null })
       },
-    }),
-    {
-      name: 'auth-session',
-      partialize: (state) => ({
-        user: state.user,
-      }),
-    },
-  ),
-)
+}))

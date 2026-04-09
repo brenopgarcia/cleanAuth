@@ -1,10 +1,10 @@
 using DuschnerConsulting.Application.Abstractions;
+using DuschnerConsulting.Application.Cqrs;
 using DuschnerConsulting.Application.DTOs;
-using MediatR;
 
 namespace DuschnerConsulting.Application.Commands.Login;
 
-public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthTicket?>
+public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthTicket?>
 {
     /// <summary>BCrypt ("x", 11) — burns work on unknown-email path to reduce timing probes.</summary>
     private const string UnknownUserPasswordHash =
@@ -13,30 +13,40 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthTicket?>
     private readonly IUserRepository _users;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenGenerator _jwt;
+    private readonly ITenantContext _tenantContext;
 
     public LoginCommandHandler(
         IUserRepository users,
         IPasswordHasher passwordHasher,
-        IJwtTokenGenerator jwt)
+        IJwtTokenGenerator jwt,
+        ITenantContext tenantContext)
     {
         _users = users;
         _passwordHasher = passwordHasher;
         _jwt = jwt;
+        _tenantContext = tenantContext;
     }
 
-    public async Task<AuthTicket?> Handle(LoginCommand request, CancellationToken cancellationToken)
+    public async Task<AuthTicket?> Handle(LoginCommand command, CancellationToken cancellationToken)
     {
-        var user = await _users.GetByEmailAsync(request.Email, cancellationToken);
+        var user = await _users.GetByEmailAsync(command.Email, cancellationToken);
         if (user is null)
         {
-            _passwordHasher.Verify(request.Password, UnknownUserPasswordHash);
+            _passwordHasher.Verify(command.Password, UnknownUserPasswordHash);
             return null;
         }
 
-        if (!_passwordHasher.Verify(request.Password, user.PasswordHash))
+        if (!_passwordHasher.Verify(command.Password, user.PasswordHash))
+        {
             return null;
+        }
 
-        var (token, expiresIn) = _jwt.CreateAccessToken(user);
+        if (string.IsNullOrWhiteSpace(_tenantContext.TenantSlug))
+        {
+            return null;
+        }
+
+        var (token, expiresIn) = _jwt.CreateAccessToken(user, _tenantContext.TenantSlug);
         return new AuthTicket(token, expiresIn, user.Id, user.Email);
     }
 }

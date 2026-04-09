@@ -56,9 +56,15 @@ function parseNumber(value: string): number {
 
 function parseDelta(value: string): number {
   const numeric = parseNumber(value)
-  if (!numeric) return 0
-  if (value.includes('↓')) return -Math.abs(numeric)
-  if (value.includes('↑')) return Math.abs(numeric)
+  if (!numeric) {
+    return 0
+  }
+  if (value.includes('↓')) {
+    return -Math.abs(numeric)
+  }
+  if (value.includes('↑')) {
+    return Math.abs(numeric)
+  }
   return numeric
 }
 
@@ -68,7 +74,9 @@ function normalizeStandzeitLabel(label: string): string {
 
 function isOver90Standzeit(label: string): boolean {
   const normalized = normalizeStandzeitLabel(label)
-  if (normalized.startsWith('>')) return true
+  if (normalized.startsWith('>')) {
+    return true
+  }
   const [startRaw] = normalized.split('-')
   const start = Number.parseInt(startRaw, 10)
   return Number.isFinite(start) && start >= 91
@@ -149,34 +157,90 @@ function cellClass(column: DashboardColumnKey, value: string) {
 }
 
 function getRowCellValue(row: ReportRow, column: DashboardColumnKey): string {
-  if (column === 'label') return row.label
-  if (column === 'ist') return row.ist
-  if (column === 'ant') return row.ant
-  if (column === 'avgSz') return row.avgSz
-  if (column === 'erloese') return row.erloese
-  if (column === 'bgwNet') return row.bgwNet
-  if (column === 'bgwPct') return row.bgwPct
-  if (column === 'bgwEh') return row.bgwEh ?? ''
-  return row.deltaVj ?? ''
+  switch (column) {
+    case 'label': {
+      return row.label
+    }
+    case 'ist': {
+      return row.ist
+    }
+    case 'ant': {
+      return row.ant
+    }
+    case 'avgSz': {
+      return row.avgSz
+    }
+    case 'erloese': {
+      return row.erloese
+    }
+    case 'bgwNet': {
+      return row.bgwNet
+    }
+    case 'bgwPct': {
+      return row.bgwPct
+    }
+    case 'bgwEh': {
+      return row.bgwEh ?? ''
+    }
+    case 'deltaVj': {
+      return row.deltaVj ?? ''
+    }
+    default: {
+      return ''
+    }
+  }
 }
 
 function getTotalCellValue(totals: ReportTotals, column: DashboardColumnKey): string {
-  if (column === 'label') return 'gesamt:'
-  if (column === 'ist') return formatInteger(totals.count)
-  if (column === 'ant') return ''
-  if (column === 'avgSz') return formatDecimal(totals.avgSz)
-  if (column === 'erloese') return formatEuro(totals.erloese)
-  if (column === 'bgwNet') return formatEuro(totals.bgwNet)
-  if (column === 'bgwPct') return formatPercent(totals.bgwPct)
-  if (column === 'bgwEh') return formatEuro(totals.bgwEh)
-  return formatEuro(totals.abw)
+  switch (column) {
+    case 'label': {
+      return 'gesamt:'
+    }
+    case 'ist': {
+      return formatInteger(totals.count)
+    }
+    case 'ant': {
+      return ''
+    }
+    case 'avgSz': {
+      return formatDecimal(totals.avgSz)
+    }
+    case 'erloese': {
+      return formatEuro(totals.erloese)
+    }
+    case 'bgwNet': {
+      return formatEuro(totals.bgwNet)
+    }
+    case 'bgwPct': {
+      return formatPercent(totals.bgwPct)
+    }
+    case 'bgwEh': {
+      return formatEuro(totals.bgwEh)
+    }
+    case 'deltaVj': {
+      return formatEuro(totals.abw)
+    }
+    default: {
+      return ''
+    }
+  }
 }
 
 function getRiskCellValue(totals: ReportTotals, column: DashboardColumnKey): string {
-  if (column === 'label') return 'verk. Risiko > 90 Tg.:'
-  if (column === 'ist') return formatPercent(totals.riskOver90Pct)
-  if (column === 'bgwNet') return formatEuro(totals.riskOver90Euro)
-  return ''
+  switch (column) {
+    case 'label': {
+      return 'verk. Risiko > 90 Tg.:'
+    }
+    case 'ist': {
+      return formatPercent(totals.riskOver90Pct)
+    }
+    case 'bgwNet': {
+      return formatEuro(totals.riskOver90Euro)
+    }
+    default: {
+      return ''
+    }
+  }
 }
 
 function ReportTable({ title, rows, config }: { title: string; rows: ReportRow[]; config: DashboardTableConfig }) {
